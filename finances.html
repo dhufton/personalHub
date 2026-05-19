@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finances - Dylan Home</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body class="app-body">
+  <header class="topbar">
+    <div class="wide-container topbar-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">D</span><span>Dylan Home</span></a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="finances.html" aria-current="page">Finances</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+      <button class="btn" type="button" data-action="Budget updated">Update budget</button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="side-profile"><span class="avatar">D</span><div><strong>Dylan</strong><span>dylan@icloud.com</span></div></div>
+      <nav class="side-nav" aria-label="Finances">
+        <a href="dashboard.html">Today</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="finances.html" aria-current="page">Finances</a>
+        <a href="settings.html">Settings</a>
+        <a href="landing.html">Overview</a>
+      </nav>
+    </aside>
+
+    <main class="app-main">
+      <section class="app-header" data-od-id="finance-header">
+        <div><h1 class="screen-title">Finances</h1><p>Balances, savings progress, and recurring commitments for May.</p></div>
+        <div class="toolbar"><button class="btn secondary" type="button" data-action="Statement downloaded">Download</button><button class="btn" type="button" data-action="Savings transfer queued">Move money</button></div>
+      </section>
+
+      <section class="finance-layout" data-od-id="finance-content">
+        <div class="stack">
+          <article class="panel">
+            <div class="panel-header"><div><h2>Account balances</h2><p>Updated at 09:14.</p></div></div>
+            <div class="account-grid">
+              <div class="account-card"><span>Current</span><strong>£4,820</strong></div>
+              <div class="account-card"><span>Savings</span><strong>£12,640</strong></div>
+              <div class="account-card"><span>Credit</span><strong>£384</strong></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><div><h2>Savings goals</h2><p>Two active goals with clear monthly targets.</p></div></div>
+            <div class="goal"><div class="mini-row"><div><strong>Emergency fund</strong><span>£6,800 of £10,000</span></div><span>68%</span></div><div class="progress"><span style="width: 68%"></span></div></div>
+            <div class="goal"><div class="mini-row"><div><strong>Japan trip</strong><span>£1,950 of £3,200</span></div><span>61%</span></div><div class="progress"><span style="width: 61%"></span></div></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><div><h2>Recent transactions</h2><p>Last five personal payments.</p></div></div>
+            <div class="list">
+              <div class="transaction-row"><div><strong>Waitrose</strong><span>Groceries</span></div><span>-£42.80</span></div>
+              <div class="transaction-row"><div><strong>Trainline</strong><span>Travel</span></div><span>-£28.90</span></div>
+              <div class="transaction-row"><div><strong>Invoice payment</strong><span>Income</span></div><span>+£1,250.00</span></div>
+              <div class="transaction-row"><div><strong>PureGym</strong><span>Health</span></div><span>-£34.99</span></div>
+              <div class="transaction-row"><div><strong>Apple iCloud</strong><span>Subscription</span></div><span>-£8.99</span></div>
+            </div>
+          </article>
+        </div>
+
+        <aside class="stack">
+          <article class="panel">
+            <div class="panel-header"><div><h2>Bills</h2><p>Upcoming recurring costs.</p></div></div>
+            <div class="list">
+              <div class="list-row"><div><strong>Council tax</strong><span>28 May</span></div><span>£171</span></div>
+              <div class="list-row"><div><strong>Internet</strong><span>31 May</span></div><span>£36</span></div>
+              <div class="list-row"><div><strong>Phone</strong><span>2 Jun</span></div><span>£24</span></div>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-header"><div><h2>Subscriptions</h2><p>Tap to mark reviewed.</p></div></div>
+            <div class="list">
+              <div class="list-row"><button class="check" data-toggle-done aria-label="Review Netflix"></button><div><strong>Netflix</strong><span>Renews 22 May</span></div><span>£10.99</span></div>
+              <div class="list-row is-done"><button class="check" data-toggle-done aria-label="Review iCloud"></button><div><strong>iCloud</strong><span>Reviewed</span></div><span>£8.99</span></div>
+              <div class="list-row"><button class="check" data-toggle-done aria-label="Review Spotify"></button><div><strong>Spotify</strong><span>Renews 4 Jun</span></div><span>£11.99</span></div>
+            </div>
+          </article>
+        </aside>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

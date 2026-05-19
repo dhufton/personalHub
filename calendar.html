@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calendar - Dylan Home</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body class="app-body">
+  <header class="topbar">
+    <div class="wide-container topbar-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">D</span><span>Dylan Home</span></a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="calendar.html" aria-current="page">Calendar</a>
+        <a href="finances.html">Finances</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+      <button class="btn" type="button" data-action="New event started">New event</button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="side-profile"><span class="avatar">D</span><div><strong>Dylan</strong><span>dylan@icloud.com</span></div></div>
+      <nav class="side-nav" aria-label="Calendar">
+        <a href="dashboard.html">Today</a>
+        <a href="calendar.html" aria-current="page">Calendar</a>
+        <a href="finances.html">Finances</a>
+        <a href="settings.html">Settings</a>
+        <a href="landing.html">Overview</a>
+      </nav>
+    </aside>
+
+    <main class="app-main">
+      <section class="app-header" data-od-id="calendar-header">
+        <div><h1 class="screen-title">Calendar</h1><p>Week planner for action, month overview for context.</p></div>
+        <div class="segmented" data-segment-group>
+          <button type="button" class="is-active" data-segment="week">Week</button>
+          <button type="button" data-segment="month">Month</button>
+        </div>
+      </section>
+
+      <section class="panel" data-view="week" data-od-id="calendar-week">
+        <div class="panel-header"><div><h2>Week of 19 May</h2><p>Focus blocks stay visible around fixed commitments.</p></div><button class="btn secondary" type="button" data-action="Week exported">Export</button></div>
+        <div class="week-board">
+          <div class="time-col"><span class="time-slot">08:00</span><span class="time-slot">09:00</span><span class="time-slot">10:00</span><span class="time-slot">11:00</span><span class="time-slot">12:00</span><span class="time-slot">13:00</span><span class="time-slot">14:00</span><span class="time-slot">15:00</span></div>
+          <div class="week-col"><div class="week-block">Mon</div><div class="week-block busy">Planning</div><div class="week-block"></div><div class="week-block busy">Client sync</div><div class="week-block"></div><div class="week-block busy">Gym</div><div class="week-block"></div><div class="week-block"></div></div>
+          <div class="week-col"><div class="week-block">Tue</div><div class="week-block busy">Inbox clear</div><div class="week-block busy">Homepage notes</div><div class="week-block"></div><div class="week-block"></div><div class="week-block busy">Design review</div><div class="week-block"></div><div class="week-block busy">Dinner</div></div>
+          <div class="week-col"><div class="week-block">Wed</div><div class="week-block"></div><div class="week-block busy">Deep work</div><div class="week-block busy">Deep work</div><div class="week-block"></div><div class="week-block"></div><div class="week-block busy">Finance check</div><div class="week-block"></div></div>
+          <div class="week-col"><div class="week-block">Thu</div><div class="week-block busy">Standup</div><div class="week-block"></div><div class="week-block busy">Prototype pass</div><div class="week-block"></div><div class="week-block busy">Call Sam</div><div class="week-block"></div><div class="week-block"></div></div>
+          <div class="week-col"><div class="week-block">Fri</div><div class="week-block"></div><div class="week-block busy">Travel admin</div><div class="week-block"></div><div class="week-block busy">Lunch</div><div class="week-block"></div><div class="week-block busy">Train</div><div class="week-block"></div></div>
+        </div>
+      </section>
+
+      <section class="panel" data-view="month" data-od-id="calendar-month" hidden>
+        <div class="panel-header"><div><h2>May 2026</h2><p>Key dates and recurring personal events.</p></div><button class="btn secondary" type="button" data-action="Month printed">Print</button></div>
+        <div class="calendar-grid">
+          <div class="month-cell"><time>1 Fri</time><span class="event-chip">Rent paid</span></div><div class="month-cell"><time>2 Sat</time></div><div class="month-cell"><time>3 Sun</time><span class="event-chip">Weekly reset</span></div><div class="month-cell"><time>4 Mon</time></div><div class="month-cell"><time>5 Tue</time></div><div class="month-cell"><time>6 Wed</time><span class="event-chip">Dentist</span></div><div class="month-cell"><time>7 Thu</time></div>
+          <div class="month-cell"><time>8 Fri</time></div><div class="month-cell"><time>9 Sat</time></div><div class="month-cell"><time>10 Sun</time><span class="event-chip">Weekly reset</span></div><div class="month-cell"><time>11 Mon</time></div><div class="month-cell"><time>12 Tue</time></div><div class="month-cell"><time>13 Wed</time></div><div class="month-cell"><time>14 Thu</time><span class="event-chip">Subscription review</span></div>
+          <div class="month-cell"><time>15 Fri</time></div><div class="month-cell"><time>16 Sat</time><span class="event-chip">Family dinner</span></div><div class="month-cell"><time>17 Sun</time><span class="event-chip">Weekly reset</span></div><div class="month-cell"><time>18 Mon</time></div><div class="month-cell"><time>19 Tue</time><span class="event-chip">Design review</span><span class="event-chip">Dinner</span></div><div class="month-cell"><time>20 Wed</time><span class="event-chip">Finance check</span></div><div class="month-cell"><time>21 Thu</time></div>
+          <div class="month-cell"><time>22 Fri</time><span class="event-chip">Train</span></div><div class="month-cell"><time>23 Sat</time></div><div class="month-cell"><time>24 Sun</time><span class="event-chip">Weekly reset</span></div><div class="month-cell"><time>25 Mon</time></div><div class="month-cell"><time>26 Tue</time></div><div class="month-cell"><time>27 Wed</time></div><div class="month-cell"><time>28 Thu</time><span class="event-chip">Council tax</span></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

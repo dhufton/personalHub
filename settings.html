@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings - Dylan Home</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body class="app-body">
+  <header class="topbar">
+    <div class="wide-container topbar-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">D</span><span>Dylan Home</span></a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="finances.html">Finances</a>
+        <a href="settings.html" aria-current="page">Settings</a>
+      </nav>
+      <button class="btn" type="button" data-action="Settings saved">Save</button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="side-profile"><span class="avatar">D</span><div><strong>Dylan</strong><span>dylan@icloud.com</span></div></div>
+      <nav class="side-nav" aria-label="Settings">
+        <a href="dashboard.html">Today</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="finances.html">Finances</a>
+        <a href="settings.html" aria-current="page">Settings</a>
+        <a href="landing.html">Overview</a>
+      </nav>
+    </aside>
+
+    <main class="app-main">
+      <section class="app-header" data-od-id="settings-header">
+        <div><h1 class="screen-title">Settings</h1><p>Profile and connected accounts for the signed-in user.</p></div>
+      </section>
+
+      <section class="settings-grid" data-od-id="settings-content">
+        <article class="settings-panel profile-card">
+          <span class="avatar">D</span>
+          <div><h2>Dylan</h2><p>dylan@icloud.com</p></div>
+          <button class="btn secondary" type="button" data-action="Photo picker opened">Change photo</button>
+        </article>
+
+        <div class="stack">
+          <article class="settings-panel">
+            <div class="panel-header"><div><h2>Profile</h2><p>Basic details shown across the dashboard.</p></div></div>
+            <form class="form-grid">
+              <label>Display name<input class="field-input" value="Dylan"></label>
+              <label>Email<input class="field-input" value="dylan@icloud.com"></label>
+              <label>Home currency<select class="select-input"><option>GBP (£)</option><option>USD ($)</option><option>EUR (€)</option></select></label>
+              <label>Week starts<select class="select-input"><option>Monday</option><option>Sunday</option></select></label>
+            </form>
+          </article>
+
+          <article class="settings-panel">
+            <div class="panel-header"><div><h2>Connected accounts</h2><p>Personal integrations feeding calendar and finance views.</p></div><button class="btn secondary" type="button" data-action="Connect flow opened">Connect</button></div>
+            <div class="list">
+              <div class="setting-row"><div><strong>iCloud Calendar</strong><span>Syncing events and reminders</span></div><button class="toggle is-on" type="button" aria-pressed="true" data-toggle></button></div>
+              <div class="setting-row"><div><strong>Monzo</strong><span>Balances and recent transactions</span></div><button class="toggle is-on" type="button" aria-pressed="true" data-toggle></button></div>
+              <div class="setting-row"><div><strong>Starling</strong><span>Savings goals and subscriptions</span></div><button class="toggle" type="button" aria-pressed="false" data-toggle></button></div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
