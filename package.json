@@ -10,10 +10,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "render:build": "npm ci && npm run build",
+    "render:build": "npm ci --include=dev && npm run build",
     "render:start": "next start -H 0.0.0.0 -p ${PORT:-10000}",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
+  },
+  "overrides": {
+    "postcss": "8.5.14"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.0",
@@ -23,7 +26,7 @@
     "swr": "^2.4.1"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.4",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^25.9.0",
     "@types/react": "^19.2.14",
