@@ -12,10 +12,9 @@ export function SettingsClient({
   connectedAccounts: ConnectedAccount[];
 }) {
   const [connections, setConnections] = useState(connectedAccounts);
-  const appleCalendar = connections.find((connection) => connection.provider === "apple_calendar");
-  const [appleCalendarUrl, setAppleCalendarUrl] = useState(
-    typeof appleCalendar?.publicConfig?.ical_url === "string" ? appleCalendar.publicConfig.ical_url : ""
-  );
+  const appleCalendars = connections.filter((connection) => connection.provider === "apple_calendar");
+  const [appleCalendarName, setAppleCalendarName] = useState("");
+  const [appleCalendarUrl, setAppleCalendarUrl] = useState("");
   const [integrationStatus, setIntegrationStatus] = useState("");
   const [isSavingIntegration, setIsSavingIntegration] = useState(false);
 
@@ -29,10 +28,10 @@ export function SettingsClient({
     setIntegrationStatus("");
 
     const response = await fetch("/api/integrations/apple-calendar", {
-      method: "PATCH",
+      method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        displayName: "Apple Calendar",
+        displayName: appleCalendarName,
         icalUrl: appleCalendarUrl
       })
     });
@@ -44,20 +43,30 @@ export function SettingsClient({
       return;
     }
 
-    setIntegrationStatus("Apple Calendar saved for this user.");
-    setConnections((items) =>
-      items.map((item) =>
-        item.provider === "apple_calendar"
-          ? {
-              ...item,
-              enabled: true,
-              status: "connected",
-              accessMode: "public_ical",
-              publicConfig: { ical_url: appleCalendarUrl }
-            }
-          : item
-      )
-    );
+    const label = appleCalendarName.trim() || "Apple Calendar";
+    setIntegrationStatus(`${label} saved for this user.`);
+    setAppleCalendarName("");
+    setAppleCalendarUrl("");
+    setConnections((items) => {
+      const nextId = typeof payload.id === "string" ? payload.id : `local_${Date.now()}`;
+      const existingIndex = items.findIndex((item) => item.id === nextId);
+      const nextItem = {
+        id: nextId,
+        name: label,
+        description: "Per-user iCloud calendar feed",
+        provider: "apple_calendar" as const,
+        enabled: true,
+        status: "connected" as const,
+        accessMode: "public_ical" as const,
+        publicConfig: { ical_url: appleCalendarUrl }
+      };
+
+      if (existingIndex >= 0) {
+        return items.map((item) => (item.id === nextId ? nextItem : item));
+      }
+
+      return [nextItem, ...items];
+    });
   }
 
   return (
@@ -83,8 +92,17 @@ export function SettingsClient({
             </form>
           </Panel>
 
-          <Panel title="Apple Calendar" description="Saved per user. Public iCloud links are stored as user config; private CalDAV credentials should use Supabase Vault.">
+          <Panel title="Apple Calendars" description="Add one iCloud feed per calendar. Public iCloud links are stored per user; private CalDAV credentials should use Supabase Vault.">
             <form className="integration-form" onSubmit={saveAppleCalendar}>
+              <label>
+                Calendar name
+                <input
+                  className="field-input"
+                  placeholder="Personal, Family, Work"
+                  value={appleCalendarName}
+                  onChange={(event) => setAppleCalendarName(event.target.value)}
+                />
+              </label>
               <label>
                 iCloud calendar URL
                 <input
@@ -95,10 +113,23 @@ export function SettingsClient({
                 />
               </label>
               <button className="btn" type="submit" disabled={isSavingIntegration}>
-                {isSavingIntegration ? "Saving..." : "Save Apple Calendar"}
+                {isSavingIntegration ? "Saving..." : "Add calendar"}
               </button>
               {integrationStatus ? <p className="auth-status">{integrationStatus}</p> : null}
             </form>
+            {appleCalendars.length ? (
+              <div className="list integration-list">
+                {appleCalendars.map((calendar) => (
+                  <div className="setting-row" key={calendar.id}>
+                    <div>
+                      <strong>{calendar.name}</strong>
+                      <span>{calendar.status} · {calendar.accessMode}</span>
+                    </div>
+                    <span className="count-pill">{calendar.enabled ? "On" : "Off"}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </Panel>
 
           <Panel title="Connected accounts" description="User-specific integrations feeding calendar and finance views." action={<button className="btn secondary" type="button">Connect</button>}>

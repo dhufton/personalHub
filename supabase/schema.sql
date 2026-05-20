@@ -103,9 +103,12 @@ create table if not exists public.user_integrations (
   last_synced_at timestamptz,
   error_message text,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (user_id, provider, access_mode)
+  updated_at timestamptz not null default now()
 );
+
+create unique index if not exists user_integrations_calendar_url_idx
+  on public.user_integrations (user_id, provider, access_mode, (public_config->>'ical_url'))
+  where provider = 'apple_calendar' and access_mode = 'public_ical';
 
 create table if not exists public.journal_entries (
   id uuid primary key default gen_random_uuid(),

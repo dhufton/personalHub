@@ -970,6 +970,10 @@ button {
   font-size: var(--text-sm);
 }
 
+.integration-list {
+  margin-top: var(--space-4);
+}
+
 .auth-oauth {
   width: 100%;
 }

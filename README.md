@@ -26,7 +26,8 @@ The app falls back to placeholder data when Supabase env vars are not present.
 
 Sensitive per-user integration secrets should be stored in Supabase Vault and referenced from
 `user_integrations.vault_secret_id`. Non-secret Apple public calendar links are stored in
-`user_integrations.public_config` for the owning user.
+`user_integrations.public_config` for the owning user. Users can add multiple Apple Calendar feeds,
+for example separate personal and shared calendars; dashboard calendar data is merged per user.
 
 ## Render deployment
 

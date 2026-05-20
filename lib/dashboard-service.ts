@@ -279,20 +279,37 @@ function mapIntegrations(rows: IntegrationRow[]) {
 }
 
 async function getAppleCalendarEvents(rows: IntegrationRow[]) {
-  const integration = rows.find(
+  const integrations = rows.filter(
     (row) => row.provider === "apple_calendar" && row.status === "connected" && row.access_mode === "public_ical"
   );
-  const icalUrl = integration?.public_config?.ical_url;
 
-  if (typeof icalUrl !== "string" || !icalUrl) {
+  if (!integrations.length) {
     return null;
   }
 
-  try {
-    return await fetchAppleCalendarEvents(icalUrl);
-  } catch {
+  const results = await Promise.all(
+    integrations.map(async (integration) => {
+      const icalUrl = integration.public_config?.ical_url;
+      if (typeof icalUrl !== "string" || !icalUrl) return [];
+
+      try {
+        const events = await fetchAppleCalendarEvents(icalUrl);
+        return events.map((event) => ({
+          ...event,
+          title: integration.display_name ? `${event.title}` : event.title
+        }));
+      } catch {
+        return [];
+      }
+    })
+  );
+
+  const events = results.flat().sort((a, b) => `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`));
+  if (!events.length) {
     return null;
   }
+
+  return events;
 }
 
 function labelForProvider(provider: IntegrationProvider) {
