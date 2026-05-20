@@ -7,6 +7,7 @@ Personal OS dashboard for Dylan. Current scope:
 - OpenAI-only future AI integration
 - Placeholder cards for Operator, Session, Calendar, Habits, and Finance
 - No Telegram or Anthropic integration at this stage
+- Apple Calendar is modeled as a per-user integration, not a deployment-wide env var
 
 ## Supabase schema
 
@@ -18,9 +19,14 @@ Apply `supabase/schema.sql` to a Supabase project. The schema uses dedicated tab
 - `habit_entries`
 - `finance_snapshots`
 - future `journal_entries`, `notes`, and `decisions`
+- `user_integrations` for per-user Apple Calendar/manual finance/OpenAI connection metadata
 - `memory_chunks` with `pgvector` for later OpenAI embeddings
 
 The app falls back to placeholder data when Supabase env vars are not present.
+
+Sensitive per-user integration secrets should be stored in Supabase Vault and referenced from
+`user_integrations.vault_secret_id`. Non-secret Apple public calendar links are stored in
+`user_integrations.public_config` for the owning user.
 
 ## Render deployment
 
@@ -37,10 +43,7 @@ This app is configured for Render with `render.yaml`.
    - `USER_TIMEZONE`
    - `OPENAI_API_KEY`
 5. Add these later when the matching integrations are implemented:
-   - `GOOGLE_CALENDAR_ICAL_URL`
-   - `GOOGLE_SHEETS_FINANCE_ID`
-   - `GOOGLE_SERVICE_ACCOUNT_EMAIL`
-   - `GOOGLE_SERVICE_ACCOUNT_KEY`
+   - no calendar URL env var is needed; Apple Calendar access is saved per user from Settings
 6. Deploy.
 
 The Render Blueprint uses:

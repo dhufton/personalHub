@@ -13,7 +13,7 @@ export function CalendarClient({ data }: { data: DashboardData }) {
     <>
       <ScreenHeader
         title="Calendar"
-        copy="Fourteen-day placeholder view. Add a Google iCal URL later to feed this surface."
+        copy="Fourteen-day placeholder view. Add an Apple Calendar link in Settings to feed this surface."
       />
 
       <Panel title="Next 14 days" description="Click a day to inspect events.">

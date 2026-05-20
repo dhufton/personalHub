@@ -1,4 +1,5 @@
 create extension if not exists vector with schema extensions;
+create extension if not exists supabase_vault with schema vault;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
@@ -48,7 +49,7 @@ create table if not exists public.calendar_events (
   start_time time not null,
   end_time time not null,
   location text,
-  source text not null default 'placeholder' check (source in ('placeholder', 'google')),
+  source text not null default 'placeholder' check (source in ('placeholder', 'apple')),
   external_id text,
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
@@ -85,9 +86,25 @@ create table if not exists public.finance_snapshots (
   net_worth numeric not null default 0,
   categories jsonb not null default '[]'::jsonb,
   notes text[] not null default '{}',
-  source text not null default 'placeholder' check (source in ('placeholder', 'google_sheet')),
+  source text not null default 'placeholder' check (source in ('placeholder', 'manual', 'openai_import')),
   raw_extract jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
+);
+
+create table if not exists public.user_integrations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  provider text not null check (provider in ('apple_calendar', 'manual_finance', 'openai')),
+  display_name text,
+  status text not null default 'needs_setup' check (status in ('connected', 'needs_setup', 'disabled', 'error')),
+  access_mode text not null default 'manual' check (access_mode in ('public_ical', 'caldav_vault', 'server_secret', 'manual')),
+  public_config jsonb not null default '{}'::jsonb,
+  vault_secret_id uuid,
+  last_synced_at timestamptz,
+  error_message text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, provider, access_mode)
 );
 
 create table if not exists public.journal_entries (
@@ -170,6 +187,9 @@ create index if not exists habit_entries_user_date_idx
 create index if not exists finance_snapshots_user_as_of_idx
   on public.finance_snapshots (user_id, as_of desc);
 
+create index if not exists user_integrations_user_provider_idx
+  on public.user_integrations (user_id, provider, status);
+
 create index if not exists journal_entries_user_date_idx
   on public.journal_entries (user_id, entry_date desc);
 
@@ -190,6 +210,7 @@ alter table public.calendar_events enable row level security;
 alter table public.habit_definitions enable row level security;
 alter table public.habit_entries enable row level security;
 alter table public.finance_snapshots enable row level security;
+alter table public.user_integrations enable row level security;
 alter table public.journal_entries enable row level security;
 alter table public.notes enable row level security;
 alter table public.decisions enable row level security;
@@ -216,6 +237,9 @@ create policy "Users read own habit entries" on public.habit_entries
   for select using (auth.uid() = user_id);
 
 create policy "Users read own finance snapshots" on public.finance_snapshots
+  for select using (auth.uid() = user_id);
+
+create policy "Users read own integrations" on public.user_integrations
   for select using (auth.uid() = user_id);
 
 create policy "Users read own journal entries" on public.journal_entries

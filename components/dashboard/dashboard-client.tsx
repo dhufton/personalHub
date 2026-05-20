@@ -104,7 +104,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           </div>
         </Panel>
 
-        <Panel title="Calendar" description="Placeholder schedule until Google Calendar is connected." action={<ButtonLink href="/calendar" variant="secondary">Open</ButtonLink>}>
+        <Panel title="Calendar" description="Placeholder schedule until Apple Calendar is connected." action={<ButtonLink href="/calendar" variant="secondary">Open</ButtonLink>}>
           <div className="agenda-list">
             {dashboard.calendarEvents.slice(0, 4).map((event) => (
               <div className="agenda-row" key={event.id}>

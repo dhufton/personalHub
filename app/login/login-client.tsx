@@ -30,13 +30,13 @@ export function LoginClient() {
     setStatus(error ? error.message : "Check your email for the login link.");
   }
 
-  async function signInWithGoogle() {
+  async function signInWithApple() {
     if (!supabase) return;
 
     setIsPending(true);
     const origin = window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
+      provider: "apple",
       options: {
         redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`
       }
@@ -58,8 +58,8 @@ export function LoginClient() {
 
         {supabase ? (
           <>
-            <button className="btn auth-google" type="button" onClick={signInWithGoogle} disabled={isPending}>
-              Continue with Google
+            <button className="btn auth-oauth" type="button" onClick={signInWithApple} disabled={isPending}>
+              Continue with Apple
             </button>
             <form className="auth-form" onSubmit={signInWithEmail}>
               <label>

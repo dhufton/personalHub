@@ -13,7 +13,7 @@ export default async function FinancesPage() {
     <AppShell active="finances" profile={data.profile} cta={<button className="btn" type="button">Refresh</button>}>
       <ScreenHeader
         title="Finance"
-        copy="Placeholder finance snapshot. The Google Sheets/OpenAI extraction pipeline can plug into this table later."
+        copy="Placeholder finance snapshot. Manual entries or an OpenAI import pipeline can plug into this table later."
       />
 
       <section className="finance-layout">

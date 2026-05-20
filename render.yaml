@@ -26,7 +26,3 @@ services:
         sync: false
       - key: USER_TIMEZONE
         value: Europe/London
-      - key: GOOGLE_CALENDAR_ICAL_URL
-        sync: false
-      - key: GOOGLE_SHEETS_FINANCE_ID
-        sync: false

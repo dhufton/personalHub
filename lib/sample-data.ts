@@ -37,21 +37,21 @@ export const sampleDashboardData: DashboardData = {
     },
     {
       id: "task_3",
-      title: "Add Google Calendar iCal URL when ready",
+      title: "Add Apple Calendar link when ready",
       urgency: "this_week",
       key: false,
       priorityScore: 64,
       timeEstimateMin: 15,
-      tags: ["calendar", "integration"]
+      tags: ["apple", "calendar"]
     },
     {
       id: "task_4",
-      title: "Prepare finance sheet service-account access",
+      title: "Choose the first finance import source",
       urgency: "this_week",
       key: true,
       priorityScore: 72,
       timeEstimateMin: 30,
-      tags: ["finance", "google"]
+      tags: ["finance", "integration"]
     }
   ],
   calendarEvents: [
@@ -121,25 +121,34 @@ export const sampleDashboardData: DashboardData = {
       { id: "cat_investments", name: "Investments", value: 0, kind: "asset" },
       { id: "cat_credit", name: "Credit card", value: -384, kind: "liability" }
     ],
-    notes: ["Placeholder snapshot. Connect a Google Sheet later to replace this."]
+    notes: ["Placeholder snapshot. Add manual snapshots or an OpenAI import pipeline later."]
   },
   connectedAccounts: [
     {
-      id: "conn_supabase",
-      name: "Supabase",
-      description: "Auth and Postgres storage framework",
+      id: "conn_apple_calendar",
+      name: "Apple Calendar",
+      description: "Per-user iCloud calendar feed",
+      provider: "apple_calendar",
+      status: "needs_setup",
+      accessMode: "public_ical",
       enabled: false
     },
     {
-      id: "conn_calendar",
-      name: "Google Calendar",
-      description: "iCal URL integration planned",
+      id: "conn_manual_finance",
+      name: "Manual finance",
+      description: "Finance snapshots stored per user",
+      provider: "manual_finance",
+      status: "needs_setup",
+      accessMode: "manual",
       enabled: false
     },
     {
-      id: "conn_finance",
-      name: "Google Sheets",
-      description: "Finance extraction service-account integration planned",
+      id: "conn_openai",
+      name: "OpenAI",
+      description: "Server-side AI features when enabled",
+      provider: "openai",
+      status: "needs_setup",
+      accessMode: "server_secret",
       enabled: false
     }
   ]

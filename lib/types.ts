@@ -33,7 +33,7 @@ export type CalendarEvent = {
   startTime: string;
   endTime: string;
   location?: string;
-  source: "placeholder" | "google";
+  source: "placeholder" | "apple";
 };
 
 export type HabitDefinition = {
@@ -64,14 +64,22 @@ export type FinanceSnapshot = {
   netWorth: number;
   categories: FinanceCategory[];
   notes: string[];
-  source: "placeholder" | "google_sheet";
+  source: "placeholder" | "manual" | "openai_import";
 };
+
+export type IntegrationProvider = "apple_calendar" | "manual_finance" | "openai";
+export type IntegrationStatus = "connected" | "needs_setup" | "disabled" | "error";
+export type IntegrationAccessMode = "public_ical" | "caldav_vault" | "server_secret" | "manual";
 
 export type ConnectedAccount = {
   id: string;
   name: string;
   description: string;
+  provider: IntegrationProvider;
+  status: IntegrationStatus;
+  accessMode: IntegrationAccessMode;
   enabled: boolean;
+  publicConfig?: Record<string, unknown>;
 };
 
 export type DashboardData = {

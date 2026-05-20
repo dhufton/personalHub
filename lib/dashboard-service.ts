@@ -1,4 +1,5 @@
 import { getConfiguredUserId } from "@/lib/env";
+import { fetchAppleCalendarEvents } from "@/lib/integrations/apple-calendar";
 import { DEMO_USER_ID, sampleDashboardData } from "@/lib/sample-data";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -9,6 +10,9 @@ import type {
   FinanceSnapshot,
   HabitDefinition,
   HabitLog,
+  IntegrationAccessMode,
+  IntegrationProvider,
+  IntegrationStatus,
   Task,
   TaskUrgency,
   UserProfile
@@ -46,7 +50,7 @@ type CalendarEventRow = {
   start_time: string;
   end_time: string;
   location: string | null;
-  source: "placeholder" | "google" | null;
+  source: "placeholder" | "apple" | null;
 };
 
 type HabitRow = {
@@ -70,7 +74,18 @@ type FinanceSnapshotRow = {
   net_worth: number | null;
   categories: FinanceCategory[] | null;
   notes: string[] | null;
-  source: "placeholder" | "google_sheet" | null;
+  source: "placeholder" | "manual" | "openai_import" | null;
+};
+
+type IntegrationRow = {
+  id: string;
+  provider: IntegrationProvider;
+  display_name: string | null;
+  status: IntegrationStatus | null;
+  access_mode: IntegrationAccessMode | null;
+  public_config: Record<string, unknown> | null;
+  last_synced_at: string | null;
+  error_message: string | null;
 };
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -81,7 +96,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     return sampleDashboardData;
   }
 
-  const [profileResult, tasksResult, calendarResult, habitsResult, habitLogsResult, financeResult] =
+  const [profileResult, tasksResult, calendarResult, habitsResult, habitLogsResult, financeResult, integrationsResult] =
     await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle<ProfileRow>(),
       supabase
@@ -120,7 +135,13 @@ export async function getDashboardData(): Promise<DashboardData> {
         .eq("user_id", userId)
         .order("as_of", { ascending: false })
         .limit(1)
-        .maybeSingle<FinanceSnapshotRow>()
+        .maybeSingle<FinanceSnapshotRow>(),
+      supabase
+        .from("user_integrations")
+        .select("id,provider,display_name,status,access_mode,public_config,last_synced_at,error_message")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true })
+        .returns<IntegrationRow[]>()
     ]);
 
   if (
@@ -129,19 +150,23 @@ export async function getDashboardData(): Promise<DashboardData> {
     calendarResult.error ||
     habitsResult.error ||
     habitLogsResult.error ||
-    financeResult.error
+    financeResult.error ||
+    integrationsResult.error
   ) {
     return sampleDashboardData;
   }
 
+  const integrations = integrationsResult.data ?? [];
+  const appleEvents = await getAppleCalendarEvents(integrations);
+
   return {
     profile: mapProfile(profileResult.data),
     tasks: (tasksResult.data ?? []).map(mapTask),
-    calendarEvents: (calendarResult.data ?? []).map(mapCalendarEvent),
+    calendarEvents: appleEvents ?? (calendarResult.data ?? []).map(mapCalendarEvent),
     habits: (habitsResult.data ?? []).map(mapHabit),
     habitLogs: (habitLogsResult.data ?? []).map(mapHabitLog),
     financeSnapshot: mapFinanceSnapshot(financeResult.data),
-    connectedAccounts: sampleDashboardData.connectedAccounts
+    connectedAccounts: mapIntegrations(integrations)
   };
 }
 
@@ -234,6 +259,58 @@ function mapFinanceSnapshot(row?: FinanceSnapshotRow | null): FinanceSnapshot {
     notes: row.notes ?? [],
     source: row.source ?? "placeholder"
   };
+}
+
+function mapIntegrations(rows: IntegrationRow[]) {
+  if (!rows.length) {
+    return sampleDashboardData.connectedAccounts;
+  }
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.display_name ?? labelForProvider(row.provider),
+    description: descriptionForIntegration(row),
+    provider: row.provider,
+    status: row.status ?? "needs_setup",
+    accessMode: row.access_mode ?? "manual",
+    enabled: row.status === "connected",
+    publicConfig: row.public_config ?? undefined
+  }));
+}
+
+async function getAppleCalendarEvents(rows: IntegrationRow[]) {
+  const integration = rows.find(
+    (row) => row.provider === "apple_calendar" && row.status === "connected" && row.access_mode === "public_ical"
+  );
+  const icalUrl = integration?.public_config?.ical_url;
+
+  if (typeof icalUrl !== "string" || !icalUrl) {
+    return null;
+  }
+
+  try {
+    return await fetchAppleCalendarEvents(icalUrl);
+  } catch {
+    return null;
+  }
+}
+
+function labelForProvider(provider: IntegrationProvider) {
+  if (provider === "apple_calendar") return "Apple Calendar";
+  if (provider === "manual_finance") return "Manual finance";
+  return "OpenAI";
+}
+
+function descriptionForIntegration(row: IntegrationRow) {
+  if (row.error_message) return row.error_message;
+  if (row.provider === "apple_calendar" && row.access_mode === "public_ical") {
+    return "Per-user iCloud calendar feed";
+  }
+  if (row.provider === "apple_calendar" && row.access_mode === "caldav_vault") {
+    return "Private CalDAV credentials stored via Supabase Vault";
+  }
+  if (row.provider === "manual_finance") return "Finance snapshots stored per user";
+  return "Server-side OpenAI features";
 }
 
 function initialsForName(name: string) {

@@ -12,9 +12,52 @@ export function SettingsClient({
   connectedAccounts: ConnectedAccount[];
 }) {
   const [connections, setConnections] = useState(connectedAccounts);
+  const appleCalendar = connections.find((connection) => connection.provider === "apple_calendar");
+  const [appleCalendarUrl, setAppleCalendarUrl] = useState(
+    typeof appleCalendar?.publicConfig?.ical_url === "string" ? appleCalendar.publicConfig.ical_url : ""
+  );
+  const [integrationStatus, setIntegrationStatus] = useState("");
+  const [isSavingIntegration, setIsSavingIntegration] = useState(false);
 
   function toggleConnection(id: string) {
     setConnections((items) => items.map((item) => (item.id === id ? { ...item, enabled: !item.enabled } : item)));
+  }
+
+  async function saveAppleCalendar(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSavingIntegration(true);
+    setIntegrationStatus("");
+
+    const response = await fetch("/api/integrations/apple-calendar", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        displayName: "Apple Calendar",
+        icalUrl: appleCalendarUrl
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+    setIsSavingIntegration(false);
+
+    if (!response.ok) {
+      setIntegrationStatus(typeof payload.error === "string" ? payload.error : "Could not save Apple Calendar.");
+      return;
+    }
+
+    setIntegrationStatus("Apple Calendar saved for this user.");
+    setConnections((items) =>
+      items.map((item) =>
+        item.provider === "apple_calendar"
+          ? {
+              ...item,
+              enabled: true,
+              status: "connected",
+              accessMode: "public_ical",
+              publicConfig: { ical_url: appleCalendarUrl }
+            }
+          : item
+      )
+    );
   }
 
   return (
@@ -40,13 +83,31 @@ export function SettingsClient({
             </form>
           </Panel>
 
-          <Panel title="Connected accounts" description="Personal integrations feeding calendar and finance views." action={<button className="btn secondary" type="button">Connect</button>}>
+          <Panel title="Apple Calendar" description="Saved per user. Public iCloud links are stored as user config; private CalDAV credentials should use Supabase Vault.">
+            <form className="integration-form" onSubmit={saveAppleCalendar}>
+              <label>
+                iCloud calendar URL
+                <input
+                  className="field-input"
+                  placeholder="webcal://..."
+                  value={appleCalendarUrl}
+                  onChange={(event) => setAppleCalendarUrl(event.target.value)}
+                />
+              </label>
+              <button className="btn" type="submit" disabled={isSavingIntegration}>
+                {isSavingIntegration ? "Saving..." : "Save Apple Calendar"}
+              </button>
+              {integrationStatus ? <p className="auth-status">{integrationStatus}</p> : null}
+            </form>
+          </Panel>
+
+          <Panel title="Connected accounts" description="User-specific integrations feeding calendar and finance views." action={<button className="btn secondary" type="button">Connect</button>}>
             <div className="list">
               {connections.map((connection) => (
                 <div className="setting-row" key={connection.id}>
                   <div>
                     <strong>{connection.name}</strong>
-                    <span>{connection.description}</span>
+                    <span>{connection.description} · {connection.status}</span>
                   </div>
                   <button
                     aria-label={`Toggle ${connection.name}`}
