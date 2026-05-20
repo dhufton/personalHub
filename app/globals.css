@@ -955,6 +955,14 @@ button {
   margin-bottom: var(--space-5);
 }
 
+.auth-mode {
+  width: 100%;
+}
+
+.auth-mode button {
+  flex: 1;
+}
+
 .auth-form,
 .auth-placeholder,
 .integration-form {
@@ -972,10 +980,6 @@ button {
 
 .integration-list {
   margin-top: var(--space-4);
-}
-
-.auth-oauth {
-  width: 100%;
 }
 
 @media (max-width: 1180px) {

@@ -9,40 +9,45 @@ export function LoginClient() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/dashboard";
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
+  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
   const [isPending, setIsPending] = useState(false);
 
-  async function signInWithEmail(event: React.FormEvent<HTMLFormElement>) {
+  async function submitEmailPassword(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!supabase || !email.trim()) return;
+    if (!supabase || !email.trim() || !password) return;
 
     setIsPending(true);
     setStatus("");
-    const origin = window.location.origin;
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`
-      }
-    });
-    setIsPending(false);
-    setStatus(error ? error.message : "Check your email for the login link.");
-  }
 
-  async function signInWithApple() {
-    if (!supabase) return;
-
-    setIsPending(true);
-    const origin = window.location.origin;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "apple",
-      options: {
-        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`
-      }
-    });
+    const result =
+      mode === "sign-up"
+        ? await supabase.auth.signUp({
+            email: email.trim(),
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+            }
+          })
+        : await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password
+          });
     setIsPending(false);
-    if (error) setStatus(error.message);
+
+    if (result.error) {
+      setStatus(result.error.message);
+      return;
+    }
+
+    if (mode === "sign-up" && !result.data.session) {
+      setStatus("Check your email to confirm your account, then sign in.");
+      return;
+    }
+
+    window.location.assign(next);
   }
 
   return (
@@ -52,16 +57,21 @@ export function LoginClient() {
           <span className="brand-mark">D</span>
           <h1 className="screen-title">Personal OS</h1>
           <p className="screen-copy">
-            Sign in with Supabase Auth when configured. Without Supabase env vars, the local placeholder dashboard remains available.
+            Sign in with email and password. Without Supabase env vars, the local placeholder dashboard remains available.
           </p>
         </div>
 
         {supabase ? (
           <>
-            <button className="btn auth-oauth" type="button" onClick={signInWithApple} disabled={isPending}>
-              Continue with Apple
-            </button>
-            <form className="auth-form" onSubmit={signInWithEmail}>
+            <div className="segmented auth-mode" aria-label="Authentication mode">
+              <button className={mode === "sign-in" ? "is-active" : ""} type="button" onClick={() => setMode("sign-in")}>
+                Sign in
+              </button>
+              <button className={mode === "sign-up" ? "is-active" : ""} type="button" onClick={() => setMode("sign-up")}>
+                Sign up
+              </button>
+            </div>
+            <form className="auth-form" onSubmit={submitEmailPassword}>
               <label>
                 Email
                 <input
@@ -73,8 +83,20 @@ export function LoginClient() {
                   placeholder="dylan@example.com"
                 />
               </label>
+              <label>
+                Password
+                <input
+                  className="field-input"
+                  type="password"
+                  autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
+                  minLength={8}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="At least 8 characters"
+                />
+              </label>
               <button className="btn" type="submit" disabled={isPending}>
-                Send magic link
+                {isPending ? "Please wait..." : mode === "sign-up" ? "Create account" : "Sign in"}
               </button>
             </form>
             {status ? <p className="auth-status">{status}</p> : null}

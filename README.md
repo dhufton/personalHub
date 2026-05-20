@@ -29,6 +29,22 @@ Sensitive per-user integration secrets should be stored in Supabase Vault and re
 `user_integrations.public_config` for the owning user. Users can add multiple Apple Calendar feeds,
 for example separate personal and shared calendars; dashboard calendar data is merged per user.
 
+## Auth setup
+
+The current auth UI uses Supabase email/password sign up and sign in.
+
+In Supabase:
+
+1. Open Authentication > Providers > Email.
+2. Enable Email provider.
+3. Enable Confirm email if you want users to verify email before first sign in.
+4. Add your app URLs to Supabase Auth redirect URLs, for example:
+   - `http://localhost:3000/auth/callback`
+   - `https://<your-render-domain>/auth/callback`
+
+Apple sign-in is intentionally disabled for now. Sign in with Apple for a web app requires Apple
+Developer setup: a Services ID, Team ID, Key ID, private key, and Apple return URL configuration.
+
 ## Render deployment
 
 This app is configured for Render with `render.yaml`.
