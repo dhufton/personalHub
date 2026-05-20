@@ -4,71 +4,83 @@ import { useMemo, useState } from "react";
 import type { DashboardData } from "@/lib/types";
 import { Panel, ScreenHeader } from "@/components/ui/primitives";
 
-const days = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const;
-const hours = [8, 9, 10, 11, 12, 13, 14, 15];
-
 export function CalendarClient({ data }: { data: DashboardData }) {
-  const [view, setView] = useState<"week" | "month">("week");
-  const eventsByDayHour = useMemo(() => {
-    const map = new Map<string, string>();
-    data.calendarEvents.forEach((event) => {
-      for (let hour = event.startHour; hour < event.startHour + event.durationHours; hour += 1) {
-        map.set(`${event.day}_${hour}`, hour === event.startHour ? event.title : event.title);
-      }
-    });
-    return map;
-  }, [data.calendarEvents]);
-
-  const monthEventsByDay = useMemo(() => {
-    const map = new Map<number, string[]>();
-    data.monthEvents.forEach((event) => {
-      const day = Number(event.date.slice(-2));
-      map.set(day, [...(map.get(day) ?? []), event.label]);
-    });
-    return map;
-  }, [data.monthEvents]);
+  const [selectedDate, setSelectedDate] = useState(data.calendarEvents[0]?.date ?? localDateKey(new Date()));
+  const days = useMemo(() => nextDays(14), []);
+  const selectedEvents = data.calendarEvents.filter((event) => event.date === selectedDate);
 
   return (
     <>
       <ScreenHeader
         title="Calendar"
-        copy="Week planner for action, month overview for context."
-        actions={
-          <div className="segmented" aria-label="Calendar view">
-            <button className={view === "week" ? "is-active" : ""} type="button" onClick={() => setView("week")}>Week</button>
-            <button className={view === "month" ? "is-active" : ""} type="button" onClick={() => setView("month")}>Month</button>
-          </div>
-        }
+        copy="Fourteen-day placeholder view. Add a Google iCal URL later to feed this surface."
       />
 
-      {view === "week" ? (
-        <Panel title="Week of 19 May" description="Focus blocks stay visible around fixed commitments." action={<button className="btn secondary" type="button">Export</button>}>
-          <div className="week-board">
-            <div className="time-col">
-              {hours.map((hour) => <span className="time-slot" key={hour}>{String(hour).padStart(2, "0")}:00</span>)}
-            </div>
-            {days.map((day) => (
-              <div className="week-col" key={day}>
-                {hours.map((hour, index) => {
-                  const label = index === 0 ? day : eventsByDayHour.get(`${day}_${hour}`);
-                  return <div className={`week-block${label && label !== day ? " busy" : ""}`} key={`${day}_${hour}`}>{label}</div>;
-                })}
+      <Panel title="Next 14 days" description="Click a day to inspect events.">
+        <div className="calendar-strip calendar-strip-wide">
+          {days.map((day) => (
+            <button
+              className={`day-pill${day.key === selectedDate ? " is-today" : ""}`}
+              key={day.key}
+              type="button"
+              onClick={() => setSelectedDate(day.key)}
+            >
+              <strong>{day.weekday}</strong>
+              <span>{day.dayMonth}</span>
+            </button>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title={formatLongDate(selectedDate)} description={`${selectedEvents.length} event${selectedEvents.length === 1 ? "" : "s"}.`}>
+        <div className="agenda-list">
+          {selectedEvents.length ? (
+            selectedEvents.map((event) => (
+              <div className="agenda-row" key={event.id}>
+                <time>{event.startTime}</time>
+                <div>
+                  <strong>{event.title}</strong>
+                  <span>{event.endTime}{event.location ? ` · ${event.location}` : ""}</span>
+                </div>
               </div>
-            ))}
-          </div>
-        </Panel>
-      ) : (
-        <Panel title="May 2026" description="Key dates and recurring personal events." action={<button className="btn secondary" type="button">Print</button>}>
-          <div className="calendar-grid">
-            {Array.from({ length: 28 }, (_, index) => index + 1).map((day) => (
-              <div className="month-cell" key={day}>
-                <time>{day} {["Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu"][(day - 1) % 7]}</time>
-                {(monthEventsByDay.get(day) ?? []).map((label) => <span className="event-chip" key={label}>{label}</span>)}
-              </div>
-            ))}
-          </div>
-        </Panel>
-      )}
+            ))
+          ) : (
+            <p className="empty-state">No placeholder events for this date.</p>
+          )}
+        </div>
+      </Panel>
     </>
   );
+}
+
+function nextDays(count: number) {
+  const today = new Date();
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + index);
+    return {
+      key: localDateKey(date),
+      weekday: new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "Europe/London" }).format(date),
+      dayMonth: new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", timeZone: "Europe/London" }).format(date)
+    };
+  });
+}
+
+function localDateKey(date: Date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
+}
+
+function formatLongDate(value: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/London"
+  }).format(new Date(`${value}T12:00:00`));
 }

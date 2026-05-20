@@ -4,70 +4,67 @@ export type UserProfile = {
   email: string;
   initials: string;
   avatarUrl?: string;
+  role: "admin" | "member";
+  timezone: string;
   homeCurrency: "GBP" | "USD" | "EUR";
   weekStartsOn: "Monday" | "Sunday";
 };
 
-export type Reminder = {
+export type TaskUrgency = "today" | "this_week" | "this_month" | "someday";
+
+export type Task = {
   id: string;
   title: string;
-  dueLabel: string;
-  category: string;
-  completed: boolean;
+  description?: string;
+  urgency: TaskUrgency;
+  key: boolean;
+  priorityScore: number;
+  timeEstimateMin?: number;
+  tags: string[];
+  dueDate?: string;
+  owner?: string;
+  completedAt?: string;
 };
 
 export type CalendarEvent = {
   id: string;
   title: string;
-  day: "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
-  startHour: number;
-  durationHours: number;
-  location?: string;
-};
-
-export type MonthEvent = {
-  id: string;
   date: string;
-  label: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  source: "placeholder" | "google";
 };
 
-export type Account = {
+export type HabitDefinition = {
   id: string;
   name: string;
-  balance: number;
-  currency: "GBP";
-  kind: "current" | "savings" | "credit";
+  targetPerWeek: number;
+  sortOrder: number;
+  active: boolean;
 };
 
-export type SavingsGoal = {
+export type HabitLog = {
+  habitId: string;
+  date: string;
+  completed: boolean;
+};
+
+export type FinanceCategory = {
   id: string;
   name: string;
-  current: number;
-  target: number;
+  value: number;
+  kind: "asset" | "liability";
 };
 
-export type Bill = {
+export type FinanceSnapshot = {
   id: string;
-  name: string;
-  dueDate: string;
-  amount: number;
-};
-
-export type Subscription = Bill & {
-  reviewed: boolean;
-};
-
-export type Transaction = {
-  id: string;
-  merchant: string;
-  category: string;
-  amount: number;
-};
-
-export type Habit = {
-  id: string;
-  name: string;
-  week: boolean[];
+  asOf: string;
+  currency: "GBP" | "USD" | "EUR";
+  netWorth: number;
+  categories: FinanceCategory[];
+  notes: string[];
+  source: "placeholder" | "google_sheet";
 };
 
 export type ConnectedAccount = {
@@ -79,14 +76,10 @@ export type ConnectedAccount = {
 
 export type DashboardData = {
   profile: UserProfile;
-  reminders: Reminder[];
+  tasks: Task[];
   calendarEvents: CalendarEvent[];
-  monthEvents: MonthEvent[];
-  accounts: Account[];
-  savingsGoals: SavingsGoal[];
-  bills: Bill[];
-  subscriptions: Subscription[];
-  transactions: Transaction[];
-  habits: Habit[];
+  habits: HabitDefinition[];
+  habitLogs: HabitLog[];
+  financeSnapshot: FinanceSnapshot;
   connectedAccounts: ConnectedAccount[];
 };

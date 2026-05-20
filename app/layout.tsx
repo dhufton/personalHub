@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dylan Home",
-  description: "Personal dashboard for reminders, calendar planning, finances, and habits."
+  title: "Dylan Personal OS",
+  description: "Private personal operating dashboard for tasks, calendar, habits, and finance."
 };
 
 export default function RootLayout({

@@ -12,7 +12,21 @@ services:
         value: 24.14.1
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+        sync: false
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: USER_ID
+        sync: false
+      - key: USER_TIMEZONE
+        value: Europe/London
+      - key: GOOGLE_CALENDAR_ICAL_URL
+        sync: false
+      - key: GOOGLE_SHEETS_FINANCE_ID
         sync: false

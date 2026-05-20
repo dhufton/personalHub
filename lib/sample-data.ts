@@ -1,75 +1,146 @@
 import type { DashboardData } from "@/lib/types";
 
+export const DEMO_USER_ID = "00000000-0000-4000-8000-000000000001";
+
 export const sampleDashboardData: DashboardData = {
   profile: {
-    id: "user_dylan",
+    id: DEMO_USER_ID,
     name: "Dylan",
-    email: "dylan@icloud.com",
+    email: "dylan@example.com",
     initials: "D",
+    role: "admin",
+    timezone: "Europe/London",
     homeCurrency: "GBP",
     weekStartsOn: "Monday"
   },
-  reminders: [
-    { id: "rem_1", title: "Send revised homepage notes", dueLabel: "Due 11:00", category: "Work", completed: false },
-    { id: "rem_2", title: "Pay electricity bill", dueLabel: "Completed 08:42", category: "Home", completed: true },
-    { id: "rem_3", title: "Book Friday train", dueLabel: "Due tonight", category: "Travel", completed: false },
-    { id: "rem_4", title: "Order groceries for Thursday", dueLabel: "Due 18:00", category: "Home", completed: false }
+  tasks: [
+    {
+      id: "task_1",
+      title: "Review the Personal OS build scope",
+      description: "Confirm the first dashboard surface before adding capture or memory.",
+      urgency: "today",
+      key: true,
+      priorityScore: 94,
+      timeEstimateMin: 35,
+      tags: ["planning", "personal-os"],
+      dueDate: "2026-05-20"
+    },
+    {
+      id: "task_2",
+      title: "Create Supabase project and apply schema",
+      urgency: "today",
+      key: true,
+      priorityScore: 88,
+      timeEstimateMin: 45,
+      tags: ["supabase", "setup"],
+      dueDate: "2026-05-20"
+    },
+    {
+      id: "task_3",
+      title: "Add Google Calendar iCal URL when ready",
+      urgency: "this_week",
+      key: false,
+      priorityScore: 64,
+      timeEstimateMin: 15,
+      tags: ["calendar", "integration"]
+    },
+    {
+      id: "task_4",
+      title: "Prepare finance sheet service-account access",
+      urgency: "this_week",
+      key: true,
+      priorityScore: 72,
+      timeEstimateMin: 30,
+      tags: ["finance", "google"]
+    }
   ],
   calendarEvents: [
-    { id: "evt_1", title: "Planning", day: "Mon", startHour: 9, durationHours: 1 },
-    { id: "evt_2", title: "Client sync", day: "Mon", startHour: 11, durationHours: 1, location: "Zoom" },
-    { id: "evt_3", title: "Inbox clear", day: "Tue", startHour: 9, durationHours: 1 },
-    { id: "evt_4", title: "Homepage notes", day: "Tue", startHour: 10, durationHours: 1 },
-    { id: "evt_5", title: "Design review", day: "Tue", startHour: 13, durationHours: 1, location: "Studio" },
-    { id: "evt_6", title: "Deep work", day: "Wed", startHour: 10, durationHours: 2 },
-    { id: "evt_7", title: "Finance check", day: "Wed", startHour: 14, durationHours: 1 },
-    { id: "evt_8", title: "Prototype pass", day: "Thu", startHour: 11, durationHours: 1 },
-    { id: "evt_9", title: "Train", day: "Fri", startHour: 14, durationHours: 1 }
-  ],
-  monthEvents: [
-    { id: "month_1", date: "2026-05-01", label: "Rent paid" },
-    { id: "month_2", date: "2026-05-06", label: "Dentist" },
-    { id: "month_3", date: "2026-05-14", label: "Subscription review" },
-    { id: "month_4", date: "2026-05-16", label: "Family dinner" },
-    { id: "month_5", date: "2026-05-19", label: "Design review" },
-    { id: "month_6", date: "2026-05-20", label: "Finance check" },
-    { id: "month_7", date: "2026-05-22", label: "Train" },
-    { id: "month_8", date: "2026-05-28", label: "Council tax" }
-  ],
-  accounts: [
-    { id: "acc_current", name: "Current", balance: 4820, currency: "GBP", kind: "current" },
-    { id: "acc_savings", name: "Savings", balance: 12640, currency: "GBP", kind: "savings" },
-    { id: "acc_credit", name: "Credit", balance: -384, currency: "GBP", kind: "credit" }
-  ],
-  savingsGoals: [
-    { id: "goal_emergency", name: "Emergency fund", current: 6800, target: 10000 },
-    { id: "goal_japan", name: "Japan trip", current: 1950, target: 3200 }
-  ],
-  bills: [
-    { id: "bill_council_tax", name: "Council tax", dueDate: "28 May", amount: 171 },
-    { id: "bill_internet", name: "Internet", dueDate: "31 May", amount: 36 },
-    { id: "bill_phone", name: "Phone", dueDate: "2 Jun", amount: 24 }
-  ],
-  subscriptions: [
-    { id: "sub_netflix", name: "Netflix", dueDate: "22 May", amount: 10.99, reviewed: false },
-    { id: "sub_icloud", name: "iCloud", dueDate: "Reviewed", amount: 8.99, reviewed: true },
-    { id: "sub_spotify", name: "Spotify", dueDate: "4 Jun", amount: 11.99, reviewed: false }
-  ],
-  transactions: [
-    { id: "txn_waitrose", merchant: "Waitrose", category: "Groceries", amount: -42.8 },
-    { id: "txn_trainline", merchant: "Trainline", category: "Travel", amount: -28.9 },
-    { id: "txn_invoice", merchant: "Invoice payment", category: "Income", amount: 1250 },
-    { id: "txn_puregym", merchant: "PureGym", category: "Health", amount: -34.99 },
-    { id: "txn_icloud", merchant: "Apple iCloud", category: "Subscription", amount: -8.99 }
+    {
+      id: "evt_1",
+      title: "Personal OS planning",
+      date: "2026-05-20",
+      startTime: "09:30",
+      endTime: "10:15",
+      source: "placeholder"
+    },
+    {
+      id: "evt_2",
+      title: "Finance review",
+      date: "2026-05-20",
+      startTime: "12:30",
+      endTime: "13:00",
+      location: "Desk",
+      source: "placeholder"
+    },
+    {
+      id: "evt_3",
+      title: "Deep work block",
+      date: "2026-05-21",
+      startTime: "10:00",
+      endTime: "12:00",
+      source: "placeholder"
+    },
+    {
+      id: "evt_4",
+      title: "Weekly reset",
+      date: "2026-05-24",
+      startTime: "17:00",
+      endTime: "17:45",
+      source: "placeholder"
+    }
   ],
   habits: [
-    { id: "habit_workout", name: "Workout", week: [true, true, true, false, false, false, false] },
-    { id: "habit_read", name: "Read", week: [true, true, false, false, false, false, false] },
-    { id: "habit_water", name: "Water", week: [true, true, true, true, false, false, false] }
+    { id: "habit_train", name: "Train", targetPerWeek: 4, sortOrder: 1, active: true },
+    { id: "habit_read", name: "Read", targetPerWeek: 5, sortOrder: 2, active: true },
+    { id: "habit_water", name: "Water", targetPerWeek: 7, sortOrder: 3, active: true },
+    { id: "habit_walk", name: "Walk", targetPerWeek: 5, sortOrder: 4, active: true },
+    { id: "habit_plan", name: "Plan tomorrow", targetPerWeek: 5, sortOrder: 5, active: true },
+    { id: "habit_sleep", name: "Sleep routine", targetPerWeek: 5, sortOrder: 6, active: true }
   ],
+  habitLogs: [
+    { habitId: "habit_train", date: "2026-05-18", completed: true },
+    { habitId: "habit_train", date: "2026-05-19", completed: true },
+    { habitId: "habit_read", date: "2026-05-18", completed: true },
+    { habitId: "habit_read", date: "2026-05-20", completed: true },
+    { habitId: "habit_water", date: "2026-05-18", completed: true },
+    { habitId: "habit_water", date: "2026-05-19", completed: true },
+    { habitId: "habit_water", date: "2026-05-20", completed: true },
+    { habitId: "habit_walk", date: "2026-05-19", completed: true },
+    { habitId: "habit_plan", date: "2026-05-19", completed: true },
+    { habitId: "habit_sleep", date: "2026-05-18", completed: true }
+  ],
+  financeSnapshot: {
+    id: "finance_demo",
+    asOf: "2026-05-20T08:00:00.000Z",
+    currency: "GBP",
+    netWorth: 17076,
+    source: "placeholder",
+    categories: [
+      { id: "cat_cash", name: "Cash", value: 4820, kind: "asset" },
+      { id: "cat_savings", name: "Savings", value: 12640, kind: "asset" },
+      { id: "cat_investments", name: "Investments", value: 0, kind: "asset" },
+      { id: "cat_credit", name: "Credit card", value: -384, kind: "liability" }
+    ],
+    notes: ["Placeholder snapshot. Connect a Google Sheet later to replace this."]
+  },
   connectedAccounts: [
-    { id: "conn_icloud", name: "iCloud Calendar", description: "Syncing events and reminders", enabled: true },
-    { id: "conn_monzo", name: "Monzo", description: "Balances and recent transactions", enabled: true },
-    { id: "conn_starling", name: "Starling", description: "Savings goals and subscriptions", enabled: false }
+    {
+      id: "conn_supabase",
+      name: "Supabase",
+      description: "Auth and Postgres storage framework",
+      enabled: false
+    },
+    {
+      id: "conn_calendar",
+      name: "Google Calendar",
+      description: "iCal URL integration planned",
+      enabled: false
+    },
+    {
+      id: "conn_finance",
+      name: "Google Sheets",
+      description: "Finance extraction service-account integration planned",
+      enabled: false
+    }
   ]
 };

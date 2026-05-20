@@ -1,10 +1,11 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getSupabasePublishableKey, getSupabaseSecretKey, getSupabaseUrl } from "@/lib/env";
 
 let cachedClient: SupabaseClient | null = null;
 
-export function getSupabaseClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+export function getSupabaseAdminClient() {
+  const url = getSupabaseUrl();
+  const key = getSupabaseSecretKey() ?? getSupabasePublishableKey();
 
   if (!url || !key) {
     return null;

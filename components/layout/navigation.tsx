@@ -4,10 +4,9 @@ import type { UserProfile } from "@/lib/types";
 type ActiveRoute = "overview" | "dashboard" | "calendar" | "finances" | "settings";
 
 const navItems: Array<{ href: string; label: string; key: ActiveRoute }> = [
-  { href: "/landing", label: "Overview", key: "overview" },
-  { href: "/dashboard", label: "Dashboard", key: "dashboard" },
+  { href: "/dashboard", label: "Home", key: "dashboard" },
   { href: "/calendar", label: "Calendar", key: "calendar" },
-  { href: "/finances", label: "Finances", key: "finances" },
+  { href: "/finances", label: "Finance", key: "finances" },
   { href: "/settings", label: "Settings", key: "settings" }
 ];
 
@@ -23,9 +22,9 @@ export function TopNav({
   return (
     <header className="topbar">
       <div className="wide-container topbar-inner">
-        <Link className="brand" href="/" aria-label="Dylan Home">
+        <Link className="brand" href="/dashboard" aria-label="Dylan Personal OS">
           <span className="brand-mark">D</span>
-          <span>Dylan Home</span>
+          <span>Personal OS</span>
         </Link>
         <nav className="nav-links" aria-label="Primary">
           {navItems.map((item) => (
@@ -34,7 +33,7 @@ export function TopNav({
             </Link>
           ))}
         </nav>
-        {cta ?? (profile ? <span className="avatar">{profile.initials}</span> : <Link className="btn" href="/dashboard">Open dashboard</Link>)}
+        {cta ?? (profile ? <span className="avatar">{profile.initials}</span> : <Link className="btn" href="/dashboard">Open</Link>)}
       </div>
     </header>
   );
@@ -47,16 +46,18 @@ export function Sidebar({ active, profile }: { active: ActiveRoute; profile: Use
         <span className="avatar">{profile.initials}</span>
         <div>
           <strong>{profile.name}</strong>
-          <span>{profile.email}</span>
+          <span>{profile.role} · {profile.timezone}</span>
         </div>
       </div>
       <nav className="side-nav" aria-label="Dashboard">
-        <Link href="/dashboard" aria-current={active === "dashboard" ? "page" : undefined}>Today</Link>
+        <Link href="/dashboard" aria-current={active === "dashboard" ? "page" : undefined}>Home</Link>
         <Link href="/calendar" aria-current={active === "calendar" ? "page" : undefined}>Calendar</Link>
-        <Link href="/finances" aria-current={active === "finances" ? "page" : undefined}>Finances</Link>
+        <Link href="/finances" aria-current={active === "finances" ? "page" : undefined}>Finance</Link>
         <Link href="/settings" aria-current={active === "settings" ? "page" : undefined}>Settings</Link>
-        <Link href="/landing" aria-current={active === "overview" ? "page" : undefined}>Overview</Link>
       </nav>
+      <form action="/auth/logout" method="post">
+        <button className="side-logout" type="submit">Sign out</button>
+      </form>
     </aside>
   );
 }
