@@ -14,6 +14,16 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
+alter table public.profiles add column if not exists display_name text not null default 'User';
+alter table public.profiles add column if not exists email text;
+alter table public.profiles add column if not exists role text not null default 'member';
+alter table public.profiles add column if not exists timezone text not null default 'Europe/London';
+alter table public.profiles add column if not exists home_currency text not null default 'GBP';
+alter table public.profiles add column if not exists week_starts_on text not null default 'Monday';
+alter table public.profiles add column if not exists avatar_url text;
+alter table public.profiles add column if not exists created_at timestamptz not null default now();
+alter table public.profiles add column if not exists updated_at timestamptz not null default now();
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -64,6 +74,12 @@ create table if not exists public.entities (
   created_at timestamptz not null default now()
 );
 
+alter table public.entities add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.entities add column if not exists name text;
+alter table public.entities add column if not exists kind text;
+alter table public.entities add column if not exists metadata jsonb not null default '{}'::jsonb;
+alter table public.entities add column if not exists created_at timestamptz not null default now();
+
 create table if not exists public.tasks (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -82,6 +98,21 @@ create table if not exists public.tasks (
   updated_at timestamptz not null default now()
 );
 
+alter table public.tasks add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.tasks add column if not exists title text;
+alter table public.tasks add column if not exists description text;
+alter table public.tasks add column if not exists urgency text not null default 'someday';
+alter table public.tasks add column if not exists key boolean not null default false;
+alter table public.tasks add column if not exists priority_score numeric not null default 0;
+alter table public.tasks add column if not exists time_estimate_min integer;
+alter table public.tasks add column if not exists tags text[] not null default '{}';
+alter table public.tasks add column if not exists due_date date;
+alter table public.tasks add column if not exists owner text;
+alter table public.tasks add column if not exists entity_id uuid references public.entities (id) on delete set null;
+alter table public.tasks add column if not exists completed_at timestamptz;
+alter table public.tasks add column if not exists created_at timestamptz not null default now();
+alter table public.tasks add column if not exists updated_at timestamptz not null default now();
+
 create table if not exists public.calendar_events (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -97,6 +128,19 @@ create table if not exists public.calendar_events (
   updated_at timestamptz not null default now()
 );
 
+alter table public.calendar_events add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.calendar_events add column if not exists title text;
+alter table public.calendar_events add column if not exists event_date date;
+alter table public.calendar_events add column if not exists start_time time;
+alter table public.calendar_events add column if not exists end_time time;
+alter table public.calendar_events add column if not exists location text;
+alter table public.calendar_events add column if not exists source text not null default 'placeholder';
+alter table public.calendar_events add column if not exists external_id text;
+alter table public.calendar_events add column if not exists metadata jsonb not null default '{}'::jsonb;
+alter table public.calendar_events add column if not exists created_at timestamptz not null default now();
+alter table public.calendar_events add column if not exists updated_at timestamptz not null default now();
+update public.calendar_events set source = 'apple' where source = 'google';
+
 create table if not exists public.habit_definitions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -108,6 +152,14 @@ create table if not exists public.habit_definitions (
   updated_at timestamptz not null default now()
 );
 
+alter table public.habit_definitions add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.habit_definitions add column if not exists name text;
+alter table public.habit_definitions add column if not exists target_per_week integer not null default 7;
+alter table public.habit_definitions add column if not exists sort_order integer not null default 0;
+alter table public.habit_definitions add column if not exists active boolean not null default true;
+alter table public.habit_definitions add column if not exists created_at timestamptz not null default now();
+alter table public.habit_definitions add column if not exists updated_at timestamptz not null default now();
+
 create table if not exists public.habit_entries (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -118,6 +170,13 @@ create table if not exists public.habit_entries (
   updated_at timestamptz not null default now(),
   unique (user_id, habit_id, log_date)
 );
+
+alter table public.habit_entries add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.habit_entries add column if not exists habit_id uuid references public.habit_definitions (id) on delete cascade;
+alter table public.habit_entries add column if not exists log_date date;
+alter table public.habit_entries add column if not exists completed boolean not null default true;
+alter table public.habit_entries add column if not exists created_at timestamptz not null default now();
+alter table public.habit_entries add column if not exists updated_at timestamptz not null default now();
 
 create table if not exists public.finance_snapshots (
   id uuid primary key default gen_random_uuid(),
@@ -131,6 +190,17 @@ create table if not exists public.finance_snapshots (
   raw_extract jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
+
+alter table public.finance_snapshots add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.finance_snapshots add column if not exists as_of timestamptz not null default now();
+alter table public.finance_snapshots add column if not exists currency text not null default 'GBP';
+alter table public.finance_snapshots add column if not exists net_worth numeric not null default 0;
+alter table public.finance_snapshots add column if not exists categories jsonb not null default '[]'::jsonb;
+alter table public.finance_snapshots add column if not exists notes text[] not null default '{}';
+alter table public.finance_snapshots add column if not exists source text not null default 'placeholder';
+alter table public.finance_snapshots add column if not exists raw_extract jsonb not null default '{}'::jsonb;
+alter table public.finance_snapshots add column if not exists created_at timestamptz not null default now();
+update public.finance_snapshots set source = 'openai_import' where source = 'google_sheet';
 
 create table if not exists public.user_integrations (
   id uuid primary key default gen_random_uuid(),
@@ -146,6 +216,19 @@ create table if not exists public.user_integrations (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.user_integrations add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.user_integrations add column if not exists provider text;
+alter table public.user_integrations add column if not exists display_name text;
+alter table public.user_integrations add column if not exists status text not null default 'needs_setup';
+alter table public.user_integrations add column if not exists access_mode text not null default 'manual';
+alter table public.user_integrations add column if not exists public_config jsonb not null default '{}'::jsonb;
+alter table public.user_integrations add column if not exists vault_secret_id uuid;
+alter table public.user_integrations add column if not exists last_synced_at timestamptz;
+alter table public.user_integrations add column if not exists error_message text;
+alter table public.user_integrations add column if not exists created_at timestamptz not null default now();
+alter table public.user_integrations add column if not exists updated_at timestamptz not null default now();
+alter table public.user_integrations drop constraint if exists user_integrations_user_id_provider_access_mode_key;
 
 create unique index if not exists user_integrations_calendar_url_idx
   on public.user_integrations (user_id, provider, access_mode, (public_config->>'ical_url'))
@@ -163,6 +246,15 @@ create table if not exists public.journal_entries (
   updated_at timestamptz not null default now()
 );
 
+alter table public.journal_entries add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.journal_entries add column if not exists entry_date date;
+alter table public.journal_entries add column if not exists title text;
+alter table public.journal_entries add column if not exists body text;
+alter table public.journal_entries add column if not exists mood text;
+alter table public.journal_entries add column if not exists metadata jsonb not null default '{}'::jsonb;
+alter table public.journal_entries add column if not exists created_at timestamptz not null default now();
+alter table public.journal_entries add column if not exists updated_at timestamptz not null default now();
+
 create table if not exists public.notes (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -173,6 +265,14 @@ create table if not exists public.notes (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.notes add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.notes add column if not exists title text;
+alter table public.notes add column if not exists body text;
+alter table public.notes add column if not exists tags text[] not null default '{}';
+alter table public.notes add column if not exists entity_id uuid references public.entities (id) on delete set null;
+alter table public.notes add column if not exists created_at timestamptz not null default now();
+alter table public.notes add column if not exists updated_at timestamptz not null default now();
 
 create table if not exists public.decisions (
   id uuid primary key default gen_random_uuid(),
@@ -187,6 +287,16 @@ create table if not exists public.decisions (
   updated_at timestamptz not null default now()
 );
 
+alter table public.decisions add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.decisions add column if not exists title text;
+alter table public.decisions add column if not exists context text;
+alter table public.decisions add column if not exists decision text;
+alter table public.decisions add column if not exists status text not null default 'active';
+alter table public.decisions add column if not exists decided_at timestamptz not null default now();
+alter table public.decisions add column if not exists entity_id uuid references public.entities (id) on delete set null;
+alter table public.decisions add column if not exists created_at timestamptz not null default now();
+alter table public.decisions add column if not exists updated_at timestamptz not null default now();
+
 create table if not exists public.raw_captures (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -199,6 +309,15 @@ create table if not exists public.raw_captures (
   created_at timestamptz not null default now()
 );
 
+alter table public.raw_captures add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.raw_captures add column if not exists source text not null default 'web';
+alter table public.raw_captures add column if not exists raw_text text;
+alter table public.raw_captures add column if not exists classification jsonb not null default '{}'::jsonb;
+alter table public.raw_captures add column if not exists llm_source text not null default 'openai';
+alter table public.raw_captures add column if not exists routed_to text;
+alter table public.raw_captures add column if not exists routed_id uuid;
+alter table public.raw_captures add column if not exists created_at timestamptz not null default now();
+
 create table if not exists public.memory_chunks (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -209,6 +328,13 @@ create table if not exists public.memory_chunks (
   created_at timestamptz not null default now()
 );
 
+alter table public.memory_chunks add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.memory_chunks add column if not exists source_type text;
+alter table public.memory_chunks add column if not exists source_id uuid;
+alter table public.memory_chunks add column if not exists text text;
+alter table public.memory_chunks add column if not exists embedding vector(1536);
+alter table public.memory_chunks add column if not exists created_at timestamptz not null default now();
+
 create table if not exists public.audit_log (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -218,6 +344,41 @@ create table if not exists public.audit_log (
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
+
+alter table public.audit_log add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.audit_log add column if not exists action text;
+alter table public.audit_log add column if not exists resource_type text;
+alter table public.audit_log add column if not exists resource_id uuid;
+alter table public.audit_log add column if not exists metadata jsonb not null default '{}'::jsonb;
+alter table public.audit_log add column if not exists created_at timestamptz not null default now();
+
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check check (role in ('admin', 'member'));
+alter table public.profiles drop constraint if exists profiles_home_currency_check;
+alter table public.profiles add constraint profiles_home_currency_check check (home_currency in ('GBP', 'USD', 'EUR'));
+alter table public.profiles drop constraint if exists profiles_week_starts_on_check;
+alter table public.profiles add constraint profiles_week_starts_on_check check (week_starts_on in ('Monday', 'Sunday'));
+
+alter table public.tasks drop constraint if exists tasks_urgency_check;
+alter table public.tasks add constraint tasks_urgency_check check (urgency in ('today', 'this_week', 'this_month', 'someday'));
+
+alter table public.calendar_events drop constraint if exists calendar_events_source_check;
+alter table public.calendar_events add constraint calendar_events_source_check check (source in ('placeholder', 'apple'));
+
+alter table public.finance_snapshots drop constraint if exists finance_snapshots_currency_check;
+alter table public.finance_snapshots add constraint finance_snapshots_currency_check check (currency in ('GBP', 'USD', 'EUR'));
+alter table public.finance_snapshots drop constraint if exists finance_snapshots_source_check;
+alter table public.finance_snapshots add constraint finance_snapshots_source_check check (source in ('placeholder', 'manual', 'openai_import'));
+
+alter table public.user_integrations drop constraint if exists user_integrations_provider_check;
+alter table public.user_integrations add constraint user_integrations_provider_check check (provider in ('apple_calendar', 'manual_finance', 'openai'));
+alter table public.user_integrations drop constraint if exists user_integrations_status_check;
+alter table public.user_integrations add constraint user_integrations_status_check check (status in ('connected', 'needs_setup', 'disabled', 'error'));
+alter table public.user_integrations drop constraint if exists user_integrations_access_mode_check;
+alter table public.user_integrations add constraint user_integrations_access_mode_check check (access_mode in ('public_ical', 'caldav_vault', 'server_secret', 'manual'));
+
+alter table public.decisions drop constraint if exists decisions_status_check;
+alter table public.decisions add constraint decisions_status_check check (status in ('active', 'reversed', 'archived'));
 
 create index if not exists tasks_user_open_priority_idx
   on public.tasks (user_id, completed_at, priority_score desc);
@@ -262,44 +423,58 @@ alter table public.raw_captures enable row level security;
 alter table public.memory_chunks enable row level security;
 alter table public.audit_log enable row level security;
 
+drop policy if exists "Profiles are owner-readable" on public.profiles;
 create policy "Profiles are owner-readable" on public.profiles
   for select using (auth.uid() = id);
 
+drop policy if exists "Users read own entities" on public.entities;
 create policy "Users read own entities" on public.entities
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own tasks" on public.tasks;
 create policy "Users read own tasks" on public.tasks
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own calendar events" on public.calendar_events;
 create policy "Users read own calendar events" on public.calendar_events
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own habit definitions" on public.habit_definitions;
 create policy "Users read own habit definitions" on public.habit_definitions
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own habit entries" on public.habit_entries;
 create policy "Users read own habit entries" on public.habit_entries
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own finance snapshots" on public.finance_snapshots;
 create policy "Users read own finance snapshots" on public.finance_snapshots
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own integrations" on public.user_integrations;
 create policy "Users read own integrations" on public.user_integrations
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own journal entries" on public.journal_entries;
 create policy "Users read own journal entries" on public.journal_entries
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own notes" on public.notes;
 create policy "Users read own notes" on public.notes
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own decisions" on public.decisions;
 create policy "Users read own decisions" on public.decisions
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own raw captures" on public.raw_captures;
 create policy "Users read own raw captures" on public.raw_captures
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own memory chunks" on public.memory_chunks;
 create policy "Users read own memory chunks" on public.memory_chunks
   for select using (auth.uid() = user_id);
 
+drop policy if exists "Users read own audit log" on public.audit_log;
 create policy "Users read own audit log" on public.audit_log
   for select using (auth.uid() = user_id);
