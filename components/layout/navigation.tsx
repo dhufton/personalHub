@@ -3,12 +3,33 @@ import type { UserProfile } from "@/lib/types";
 
 type ActiveRoute = "dashboard" | "calendar" | "finances" | "settings";
 
-const navItems: Array<{ href: string; label: string; key: ActiveRoute; cue: string; glyph: string }> = [
-  { href: "/dashboard", label: "Home", key: "dashboard", cue: "Today", glyph: "OS" },
+type NavItem = {
+  href: string;
+  label: string;
+  key: ActiveRoute;
+  cue: string;
+  glyph: string;
+  icon?: "home";
+};
+
+const navItems: NavItem[] = [
+  { href: "/dashboard", label: "Home", key: "dashboard", cue: "Today", glyph: "", icon: "home" },
   { href: "/calendar", label: "Calendar", key: "calendar", cue: "Events", glyph: "07" },
   { href: "/finances", label: "Finance", key: "finances", cue: "Worth", glyph: "$" },
   { href: "/settings", label: "Settings", key: "settings", cue: "Setup", glyph: ".." }
 ];
+
+function NavGlyph({ item }: { item: NavItem }) {
+  if (item.icon === "home") {
+    return (
+      <svg aria-hidden="true" className="home-icon" viewBox="0 0 24 24">
+        <path d="M4.75 10.9 12 4.75l7.25 6.15v7.35a1.5 1.5 0 0 1-1.5 1.5h-3.3v-5.15h-4.9v5.15h-3.3a1.5 1.5 0 0 1-1.5-1.5V10.9Z" />
+      </svg>
+    );
+  }
+
+  return item.glyph;
+}
 
 export function TopNav({
   active,
@@ -32,7 +53,7 @@ export function TopNav({
         <nav className="nav-links" aria-label="Primary">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href} aria-current={active === item.key ? "page" : undefined}>
-              <span className="desktop-only">{item.glyph}</span>
+              <span className="desktop-only"><NavGlyph item={item} /></span>
               {item.label}
             </Link>
           ))}
@@ -59,7 +80,7 @@ export function Sidebar({ active, profile }: { active: ActiveRoute; profile: Use
       <nav className="side-nav" aria-label="Dashboard">
         {navItems.map((item) => (
           <Link key={item.href} href={item.href} aria-current={active === item.key ? "page" : undefined}>
-            <span className="nav-glyph">{item.glyph}</span>
+            <span className="nav-glyph"><NavGlyph item={item} /></span>
             <span>
               <span>{item.label}</span>
               <small>{item.cue}</small>

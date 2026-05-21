@@ -120,7 +120,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
       />
 
       <section className="os-grid">
-        <Panel kicker="01 // Operator" title="Profile" description={todayLabel}>
+        <Panel title="Profile" description={todayLabel}>
           <div className="operator-card">
             <span className="avatar operator-avatar">{dashboard.profile.initials}</span>
             <div>
@@ -135,7 +135,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           </div>
         </Panel>
 
-        <Panel kicker="02 // Session" title="Today" description="Capture one thing, then work the highest-scoring tasks." action={<span className="count-pill">{sessionTasks.length} active</span>} className="session-panel">
+        <Panel title="Today" description="Capture one thing, then work the highest-scoring tasks." action={<span className="count-pill">{sessionTasks.length} active</span>} className="session-panel">
           <form className="command-center" onSubmit={captureTask}>
             <div>
               <span className="panel-kicker">Focus prompt</span>
@@ -163,7 +163,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           </div>
         </Panel>
 
-        <Panel kicker="03 // Calendar" title="Schedule" description="Today and the next visible commitments." action={<ButtonLink href="/calendar" variant="secondary">Open</ButtonLink>}>
+        <Panel title="Schedule" description="Today and the next visible commitments." action={<ButtonLink href="/calendar" variant="secondary">Open</ButtonLink>}>
           <div className="agenda-list">
             {dashboard.calendarEvents.slice(0, 4).map((event) => (
               <div className="agenda-row" key={event.id}>
@@ -177,7 +177,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           </div>
         </Panel>
 
-        <Panel kicker="04 // Habits" title="Habits" description={`${completedToday}/${dashboard.habits.length} completed today.`} action={<span className="count-pill">{completionPercent}%</span>}>
+        <Panel title="Habits" description={`${completedToday}/${dashboard.habits.length} completed today.`} action={<span className="count-pill">{completionPercent}%</span>}>
           <div className="habit-grid">
             {dashboard.habits.map((habit) => (
               <div className="habit-row" key={habit.id}>
@@ -196,7 +196,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           </div>
         </Panel>
 
-        <Panel kicker="05 // Finance" title="Finance Pulse" description={`Latest ${finance.source === "placeholder" ? "manual-ready" : "sheet"} snapshot.`} action={<ButtonLink href="/finances" variant="secondary">Detail</ButtonLink>}>
+        <Panel title="Finance Pulse" description={`Latest ${finance.source === "placeholder" ? "manual-ready" : "sheet"} snapshot.`} action={<ButtonLink href="/finances" variant="secondary">Detail</ButtonLink>}>
           <div className="metric-grid">
             <div className="metric is-good"><span>Net worth</span><strong>{formatCurrency(finance.netWorth, finance.currency)}</strong></div>
             <div className="metric"><span>Assets</span><strong>{formatCurrency(assets, finance.currency)}</strong></div>
