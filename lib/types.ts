@@ -32,6 +32,7 @@ export type CalendarEvent = {
   date: string;
   startTime: string;
   endTime: string;
+  allDay?: boolean;
   location?: string;
   source: "placeholder" | "apple";
 };

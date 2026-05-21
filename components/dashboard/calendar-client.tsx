@@ -37,10 +37,10 @@ export function CalendarClient({ data }: { data: DashboardData }) {
           {selectedEvents.length ? (
             selectedEvents.map((event) => (
               <div className="agenda-row" key={event.id}>
-                <time>{event.startTime}</time>
+                <time>{event.allDay ? "All Day" : event.startTime}</time>
                 <div>
                   <strong>{event.title}</strong>
-                  <span>{event.endTime}{event.location ? ` · ${event.location}` : ""}</span>
+                  <span>{formatEventMeta(event)}</span>
                 </div>
               </div>
             ))
@@ -51,6 +51,17 @@ export function CalendarClient({ data }: { data: DashboardData }) {
       </Panel>
     </>
   );
+}
+
+function formatEventMeta(event: DashboardData["calendarEvents"][number]) {
+  const parts = [];
+  if (!event.allDay && event.endTime) {
+    parts.push(event.endTime);
+  }
+  if (event.location) {
+    parts.push(event.location);
+  }
+  return parts.join(" · ") || (event.allDay ? "All day event" : "Scheduled event");
 }
 
 function nextDays(count: number) {

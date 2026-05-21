@@ -230,6 +230,7 @@ function mapCalendarEvent(row: CalendarEventRow): CalendarEvent {
     date: row.event_date,
     startTime: row.start_time.slice(0, 5),
     endTime: row.end_time.slice(0, 5),
+    allDay: false,
     location: row.location ?? undefined,
     source: row.source ?? "placeholder"
   };
@@ -310,12 +311,19 @@ async function getAppleCalendarEvents(rows: IntegrationRow[]) {
     })
   );
 
-  const events = results.flat().sort((a, b) => `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`));
+  const events = results.flat().sort(compareCalendarEvents);
   if (!events.length) {
     return null;
   }
 
   return events;
+}
+
+function compareCalendarEvents(a: CalendarEvent, b: CalendarEvent) {
+  const dateCompare = a.date.localeCompare(b.date);
+  if (dateCompare !== 0) return dateCompare;
+  if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
+  return a.startTime.localeCompare(b.startTime);
 }
 
 function labelForProvider(provider: IntegrationProvider) {

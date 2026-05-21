@@ -111,7 +111,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
                 <time>{formatShortDate(event.date)}</time>
                 <div>
                   <strong>{event.title}</strong>
-                  <span>{event.startTime} - {event.endTime}{event.location ? ` · ${event.location}` : ""}</span>
+                  <span>{formatCalendarEventMeta(event)}</span>
                 </div>
               </div>
             ))}
@@ -206,4 +206,12 @@ function formatShortDate(value: string) {
     month: "short",
     timeZone: "Europe/London"
   }).format(new Date(`${value}T12:00:00`));
+}
+
+function formatCalendarEventMeta(event: DashboardData["calendarEvents"][number]) {
+  if (event.allDay) {
+    return `All Day${event.location ? ` · ${event.location}` : ""}`;
+  }
+
+  return `${event.startTime} - ${event.endTime}${event.location ? ` · ${event.location}` : ""}`;
 }
