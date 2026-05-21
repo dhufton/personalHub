@@ -9,21 +9,38 @@ type NavItem = {
   key: ActiveRoute;
   cue: string;
   glyph: string;
-  icon?: "home";
+  icon?: "home" | "calendar" | "settings";
 };
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Home", key: "dashboard", cue: "Today", glyph: "", icon: "home" },
-  { href: "/calendar", label: "Calendar", key: "calendar", cue: "Events", glyph: "07" },
+  { href: "/calendar", label: "Calendar", key: "calendar", cue: "Events", glyph: "", icon: "calendar" },
   { href: "/finances", label: "Finance", key: "finances", cue: "Worth", glyph: "$" },
-  { href: "/settings", label: "Settings", key: "settings", cue: "Setup", glyph: ".." }
+  { href: "/settings", label: "Settings", key: "settings", cue: "Setup", glyph: "", icon: "settings" }
 ];
 
 function NavGlyph({ item }: { item: NavItem }) {
   if (item.icon === "home") {
     return (
-      <svg aria-hidden="true" className="home-icon" viewBox="0 0 24 24">
+      <svg aria-hidden="true" className="nav-icon" viewBox="0 0 24 24">
         <path d="M4.75 10.9 12 4.75l7.25 6.15v7.35a1.5 1.5 0 0 1-1.5 1.5h-3.3v-5.15h-4.9v5.15h-3.3a1.5 1.5 0 0 1-1.5-1.5V10.9Z" />
+      </svg>
+    );
+  }
+
+  if (item.icon === "calendar") {
+    return (
+      <svg aria-hidden="true" className="nav-icon" viewBox="0 0 24 24">
+        <path d="M7 3.75v3M17 3.75v3M5.75 8.25h12.5M6.75 5.25h10.5a2 2 0 0 1 2 2v10.25a2 2 0 0 1-2 2H6.75a2 2 0 0 1-2-2V7.25a2 2 0 0 1 2-2Z" />
+      </svg>
+    );
+  }
+
+  if (item.icon === "settings") {
+    return (
+      <svg aria-hidden="true" className="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 8.75a3.25 3.25 0 1 1 0 6.5 3.25 3.25 0 0 1 0-6.5Z" />
+        <path d="M18.55 13.25a6.7 6.7 0 0 0 .05-1.25l1.7-1.25-1.8-3.1-2 .8a7.1 7.1 0 0 0-1.05-.6L15.2 5.7h-3.6l-.3 2.15c-.36.17-.7.37-1.05.6l-2-.8-1.8 3.1 1.7 1.25a6.7 6.7 0 0 0 .05 1.25L6.55 14.6l1.8 3.1 1.95-.82c.33.25.7.46 1.08.63l.22 2.1h3.6l.22-2.1c.38-.17.75-.38 1.08-.63l1.95.82 1.8-3.1-1.7-1.35Z" />
       </svg>
     );
   }

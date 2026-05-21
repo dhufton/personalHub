@@ -20,7 +20,7 @@ export function CalendarClient({ data }: { data: DashboardData }) {
       />
 
       <section className="calendar-layout">
-        <Panel kicker="01 // Range" title="Next 14 days" description="Click a day to inspect events." className="calendar-strip-panel">
+        <Panel title="Next 14 days" description="Click a day to inspect events." className="calendar-strip-panel">
           <div className="calendar-strip calendar-strip-wide">
             {days.map((day) => {
               const eventCount = data.calendarEvents.filter((event) => event.date === day.key).length;
@@ -40,18 +40,20 @@ export function CalendarClient({ data }: { data: DashboardData }) {
           </div>
         </Panel>
 
-        <Panel kicker="02 // Day" title={formatLongDate(selectedDate)} description={`${selectedEvents.length} event${selectedEvents.length === 1 ? "" : "s"}.`} className="day-agenda-panel">
+        <Panel title={formatLongDate(selectedDate)} description={`${selectedEvents.length} event${selectedEvents.length === 1 ? "" : "s"}.`} className="day-agenda-panel">
           <div className="calendar-day-detail">
             <div className="agenda-list">
               {selectedEvents.length ? (
                 selectedEvents.map((event) => (
                   <div className="agenda-row" key={event.id}>
                     <time>{event.allDay ? "All Day" : event.startTime}</time>
-                    <div>
+                    <div className="agenda-event">
                       <strong>{event.title}</strong>
-                      <span>{formatEventMeta(event)}</span>
+                      <span>
+                        {formatEventMeta(event)}
+                        <span className={`source-pill ${event.source}`}>{event.source}</span>
+                      </span>
                     </div>
-                    <span className={`source-pill ${event.source}`}>{event.source}</span>
                   </div>
                 ))
               ) : (
@@ -66,7 +68,7 @@ export function CalendarClient({ data }: { data: DashboardData }) {
           </div>
         </Panel>
 
-        <Panel kicker="03 // Queue" title="Upcoming" description="The next visible commitments." className="upcoming-panel">
+        <Panel title="Upcoming" description="The next visible commitments." className="upcoming-panel">
           <div className="list">
             {upcomingEvents.length ? (
               upcomingEvents.map((event) => (

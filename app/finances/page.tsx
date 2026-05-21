@@ -20,7 +20,7 @@ export default async function FinancesPage() {
 
       <section className="finance-layout">
         <div className="stack">
-          <Panel kicker="01 // Snapshot" title="Net worth" description={`Snapshot source: ${snapshot.source}.`}>
+          <Panel title="Net worth" description={`Snapshot source: ${snapshot.source}.`}>
             <div className="metric-grid">
               <div className="metric is-good"><span>Total</span><strong>{formatCurrency(snapshot.netWorth, snapshot.currency)}</strong></div>
               <div className="metric"><span>Assets</span><strong>{formatCurrency(sumValues(assets), snapshot.currency)}</strong></div>
@@ -39,7 +39,7 @@ export default async function FinancesPage() {
             </div>
           </Panel>
 
-          <Panel kicker="02 // Ledger" title="Categories" description="Dedicated finance_snapshots rows preserve each extracted snapshot.">
+          <Panel title="Categories" description="Dedicated finance_snapshots rows preserve each extracted snapshot.">
             <div className="list">
               {snapshot.categories.map((category) => (
                 <div className="transaction-row" key={category.id}>
@@ -52,7 +52,7 @@ export default async function FinancesPage() {
         </div>
 
         <aside className="stack">
-          <Panel kicker="03 // Position" title="Position" description="Simple health indicators for review.">
+          <Panel title="Position" description="Simple health indicators for review.">
             <div className="metric-grid side-metrics">
               <div className="metric"><span>Coverage</span><strong>{coverage}x</strong></div>
               <div className="metric"><span>Accounts</span><strong>{snapshot.categories.length}</strong></div>
@@ -63,7 +63,7 @@ export default async function FinancesPage() {
             </div>
           </Panel>
 
-          <Panel kicker="04 // Review" title="Extraction notes" description="Human review hooks for future AI finance parsing.">
+          <Panel title="Extraction notes" description="Human review hooks for future AI finance parsing.">
             <div className="list">
               {snapshot.notes.map((note) => (
                 <div className="list-row" key={note}>
