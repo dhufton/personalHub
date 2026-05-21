@@ -479,6 +479,8 @@ main {
 }
 
 .btn.success {
+  min-height: 36px;
+  padding: 8px 14px;
   background: var(--mint);
   box-shadow: 0 10px 24px rgba(52, 199, 89, 0.22);
 }
@@ -1068,7 +1070,6 @@ main {
   background: radial-gradient(circle at center, var(--mint) 38%, transparent 41%), var(--mint-soft);
 }
 
-.habit-today-list,
 .habit-manager-list,
 .subhabit-list,
 .subhabit-check-list {
@@ -1076,12 +1077,24 @@ main {
   gap: var(--space-2);
 }
 
-.habit-today-row,
 .habit-manager-row {
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   padding: var(--space-3);
   background: rgba(255, 255, 255, 0.62);
+}
+
+.habit-today-list {
+  display: grid;
+  gap: 7px;
+}
+
+.habit-today-row {
+  min-width: 0;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.58);
 }
 
 .habit-checkbox-row,
@@ -1093,7 +1106,7 @@ main {
 }
 
 .habit-checkbox-row {
-  justify-content: space-between;
+  align-items: center;
 }
 
 .habit-checkbox-row > span {
@@ -1101,7 +1114,14 @@ main {
   flex: 1;
 }
 
-.habit-checkbox-row strong,
+.habit-checkbox-row strong {
+  display: block;
+  color: var(--fg);
+  font-size: var(--text-sm);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
 .habit-manager-main strong {
   display: block;
   color: var(--fg);
@@ -1110,64 +1130,81 @@ main {
   letter-spacing: -0.015em;
 }
 
+.habit-checkbox-row small {
+  display: block;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
 .habit-checkbox-row small,
-.habit-manager-main span,
-.subhabit-manager-row span,
 .subhabit-details summary {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.habit-manager-main span,
+.subhabit-manager-row span {
   color: var(--muted);
   font-size: var(--text-sm);
 }
 
 .habit-checkbox-row input,
 .subhabit-check-row input {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   flex: 0 0 auto;
   accent-color: var(--mint);
 }
 
 .subhabit-details {
-  margin-top: var(--space-3);
+  margin-top: 8px;
+  padding-left: 30px;
 }
 
 .subhabit-details summary {
   cursor: pointer;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .subhabit-check-list {
-  margin-top: var(--space-2);
-  padding-left: var(--space-4);
+  gap: 6px;
+  margin-top: 7px;
+  padding-left: 0;
 }
 
 .subhabit-check-row {
-  min-height: 34px;
+  min-height: 26px;
+  font-size: var(--text-sm);
 }
 
 .habit-week-strip {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin-top: var(--space-4);
+  grid-template-columns: repeat(7, minmax(24px, 1fr));
+  gap: 6px;
+  margin-top: var(--space-3);
 }
 
 .week-dot-group {
   display: grid;
   place-items: center;
-  min-height: 54px;
-  border-radius: var(--radius-md);
+  min-width: 0;
+  min-height: 42px;
+  border-radius: 15px;
   background: rgba(118, 118, 128, 0.09);
 }
 
 .week-dot-group span {
   color: var(--meta);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
+  line-height: 1;
 }
 
 .week-dot-group strong {
   color: var(--fg);
   font-size: var(--text-sm);
+  line-height: 1;
 }
 
 .finance-chart {
@@ -1868,10 +1905,6 @@ main {
 
   .habit-row {
     grid-template-columns: minmax(86px, 1fr) repeat(7, 22px);
-  }
-
-  .habit-week-strip {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .subhabit-add-row {
