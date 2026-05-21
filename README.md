@@ -38,9 +38,13 @@ In Supabase:
 1. Open Authentication > Providers > Email.
 2. Enable Email provider.
 3. Enable Confirm email if you want users to verify email before first sign in.
-4. Add your app URLs to Supabase Auth redirect URLs, for example:
+4. Set Site URL to your deployed Render URL, for example `https://<your-render-domain>`.
+5. Add your app URLs to Supabase Auth redirect URLs, for example:
    - `http://localhost:3000/auth/callback`
    - `https://<your-render-domain>/auth/callback`
+
+If email confirmation links redirect to localhost, the Supabase Auth Site URL is still set to localhost
+or the deployed app is missing `NEXT_PUBLIC_SITE_URL`.
 
 Apple sign-in is intentionally disabled for now. Sign in with Apple for a web app requires Apple
 Developer setup: a Services ID, Team ID, Key ID, private key, and Apple return URL configuration.
@@ -54,6 +58,7 @@ This app is configured for Render with `render.yaml`.
 3. Review the `personal-hub` web service settings.
 4. Add the required environment variables when Render prompts for them:
    - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SITE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY`
    - `USER_ID`

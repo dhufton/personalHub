@@ -1,4 +1,5 @@
 import { getConfiguredUserId } from "@/lib/env";
+import { ensureUserProfile } from "@/lib/auth/profile";
 import { fetchAppleCalendarEvents } from "@/lib/integrations/apple-calendar";
 import { DEMO_USER_ID, sampleDashboardData } from "@/lib/sample-data";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -89,7 +90,7 @@ type IntegrationRow = {
 };
 
 export async function getDashboardData(): Promise<DashboardData> {
-  const userId = await resolveUserId();
+  const { userId } = await resolveUserContext();
   const supabase = getSupabaseAdminClient();
 
   if (!supabase) {
@@ -170,17 +171,22 @@ export async function getDashboardData(): Promise<DashboardData> {
   };
 }
 
-async function resolveUserId() {
+async function resolveUserContext() {
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
-    return getConfiguredUserId(DEMO_USER_ID);
+    return { userId: getConfiguredUserId(DEMO_USER_ID) };
   }
 
   const {
     data: { user }
   } = await supabase.auth.getUser();
 
-  return user?.id ?? getConfiguredUserId(DEMO_USER_ID);
+  if (user) {
+    await ensureUserProfile(user);
+    return { userId: user.id };
+  }
+
+  return { userId: getConfiguredUserId(DEMO_USER_ID) };
 }
 
 function mapProfile(row?: ProfileRow | null): UserProfile {

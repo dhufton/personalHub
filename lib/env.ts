@@ -17,3 +17,7 @@ export function hasSupabasePublicEnv() {
 export function getConfiguredUserId(fallbackUserId: string) {
   return process.env.USER_ID ?? fallbackUserId;
 }
+
+export function getPublicSiteUrl() {
+  return process.env.NEXT_PUBLIC_SITE_URL;
+}

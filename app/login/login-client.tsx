@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ButtonLink } from "@/components/ui/primitives";
+import { getPublicSiteUrl } from "@/lib/env";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 export function LoginClient() {
@@ -28,7 +29,7 @@ export function LoginClient() {
             email: email.trim(),
             password,
             options: {
-              emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+              emailRedirectTo: `${getAuthBaseUrl()}/auth/callback?next=${encodeURIComponent(next)}`
             }
           })
         : await supabase.auth.signInWithPassword({
@@ -111,4 +112,8 @@ export function LoginClient() {
       </section>
     </main>
   );
+}
+
+function getAuthBaseUrl() {
+  return getPublicSiteUrl() ?? window.location.origin;
 }
