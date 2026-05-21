@@ -3,11 +3,11 @@ import type { UserProfile } from "@/lib/types";
 
 type ActiveRoute = "dashboard" | "calendar" | "finances" | "settings";
 
-const navItems: Array<{ href: string; label: string; key: ActiveRoute }> = [
-  { href: "/dashboard", label: "Home", key: "dashboard" },
-  { href: "/calendar", label: "Calendar", key: "calendar" },
-  { href: "/finances", label: "Finance", key: "finances" },
-  { href: "/settings", label: "Settings", key: "settings" }
+const navItems: Array<{ href: string; label: string; key: ActiveRoute; cue: string; glyph: string }> = [
+  { href: "/dashboard", label: "Home", key: "dashboard", cue: "Today", glyph: "OS" },
+  { href: "/calendar", label: "Calendar", key: "calendar", cue: "Events", glyph: "07" },
+  { href: "/finances", label: "Finance", key: "finances", cue: "Worth", glyph: "$" },
+  { href: "/settings", label: "Settings", key: "settings", cue: "Setup", glyph: ".." }
 ];
 
 export function TopNav({
@@ -24,16 +24,23 @@ export function TopNav({
       <div className="wide-container topbar-inner">
         <Link className="brand" href="/dashboard" aria-label="Dylan Personal OS">
           <span className="brand-mark">D</span>
-          <span>Personal OS</span>
+          <span>
+            <span>Personal OS</span>
+            <span className="brand-kicker">Private command center</span>
+          </span>
         </Link>
         <nav className="nav-links" aria-label="Primary">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href} aria-current={active === item.key ? "page" : undefined}>
+              <span className="desktop-only">{item.glyph}</span>
               {item.label}
             </Link>
           ))}
         </nav>
-        {cta ?? (profile ? <span className="avatar">{profile.initials}</span> : <Link className="btn" href="/dashboard">Open</Link>)}
+        <div className="top-actions">
+          <span className="system-pill"><span className="status-dot" /> Live</span>
+          {cta ?? (profile ? <span className="avatar">{profile.initials}</span> : <Link className="btn" href="/dashboard">Open</Link>)}
+        </div>
       </div>
     </header>
   );
@@ -50,14 +57,22 @@ export function Sidebar({ active, profile }: { active: ActiveRoute; profile: Use
         </div>
       </div>
       <nav className="side-nav" aria-label="Dashboard">
-        <Link href="/dashboard" aria-current={active === "dashboard" ? "page" : undefined}>Home</Link>
-        <Link href="/calendar" aria-current={active === "calendar" ? "page" : undefined}>Calendar</Link>
-        <Link href="/finances" aria-current={active === "finances" ? "page" : undefined}>Finance</Link>
-        <Link href="/settings" aria-current={active === "settings" ? "page" : undefined}>Settings</Link>
+        {navItems.map((item) => (
+          <Link key={item.href} href={item.href} aria-current={active === item.key ? "page" : undefined}>
+            <span className="nav-glyph">{item.glyph}</span>
+            <span>
+              <span>{item.label}</span>
+              <small>{item.cue}</small>
+            </span>
+          </Link>
+        ))}
       </nav>
-      <form action="/auth/logout" method="post">
-        <button className="side-logout" type="submit">Sign out</button>
-      </form>
+      <div className="sidebar-footer">
+        <span>{profile.timezone}</span>
+        <form action="/auth/logout" method="post">
+          <button className="side-logout" type="submit">Sign out</button>
+        </form>
+      </div>
     </aside>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { fetchJson } from "@/lib/fetcher";
 import { formatCurrency } from "@/lib/format";
@@ -14,15 +14,18 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
   });
   const dashboard = data ?? initialData;
   const [habitLogs, setHabitLogs] = useState<HabitLog[]>(dashboard.habitLogs);
+  const [capturedTasks, setCapturedTasks] = useState<Task[]>([]);
+  const [captureText, setCaptureText] = useState("");
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState("");
+  const [currentTime, setCurrentTime] = useState("--:--");
 
   const sessionTasks = useMemo(() => {
-    return dashboard.tasks
+    return [...capturedTasks, ...dashboard.tasks]
       .filter((task) => task.urgency === "today" && task.key && !completedTasks.has(task.id))
       .sort((a, b) => b.priorityScore - a.priorityScore)
-      .slice(0, 3);
-  }, [completedTasks, dashboard.tasks]);
+      .slice(0, 4);
+  }, [capturedTasks, completedTasks, dashboard.tasks]);
 
   const weekDates = useMemo(() => getWeekDates(), []);
   const habitMap = useMemo(() => {
@@ -35,10 +38,48 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
   const finance = dashboard.financeSnapshot;
   const assets = finance.categories.filter((category) => category.kind === "asset").reduce((sum, category) => sum + category.value, 0);
   const liabilities = finance.categories.filter((category) => category.kind === "liability").reduce((sum, category) => sum + category.value, 0);
+  const completionPercent = dashboard.habits.length ? Math.round((completedToday / dashboard.habits.length) * 100) : 0;
+  const todayLabel = new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: dashboard.profile.timezone
+  }).format(new Date());
+
+  useEffect(() => {
+    function syncClock() {
+      setCurrentTime(new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: dashboard.profile.timezone }).format(new Date()));
+    }
+
+    syncClock();
+    const interval = window.setInterval(syncClock, 60_000);
+    return () => window.clearInterval(interval);
+  }, [dashboard.profile.timezone]);
 
   function flash(message: string) {
     setToast(message);
     window.setTimeout(() => setToast(""), 1800);
+  }
+
+  function captureTask(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const title = captureText.trim();
+    if (!title) return;
+
+    setCapturedTasks((items) => [
+      {
+        id: `capture_${Date.now()}`,
+        title,
+        urgency: "today",
+        key: true,
+        priorityScore: 82,
+        timeEstimateMin: 20,
+        tags: ["capture"]
+      },
+      ...items
+    ]);
+    setCaptureText("");
+    flash("Added to today's session");
   }
 
   function toggleTask(taskId: string) {
@@ -68,18 +109,18 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
   return (
     <>
       <ScreenHeader
-        title="Personal OS"
-        copy="A focused home for the day: operator context, session priorities, calendar, habits, and finance."
+        title={`Good afternoon, ${dashboard.profile.name}.`}
+        copy="A calm command center for today: priorities, calendar, habits, and money in one readable workspace."
         actions={
           <>
             <ButtonLink href="/login" variant="secondary">Auth</ButtonLink>
-            <button className="btn" type="button" onClick={() => flash("Placeholder mode active")}>Demo mode</button>
+            <button className="btn" type="button" onClick={() => flash(todayLabel)}>Today</button>
           </>
         }
       />
 
       <section className="os-grid">
-        <Panel title="Operator" description="Single-user control profile.">
+        <Panel kicker="01 // Operator" title="Profile" description={todayLabel}>
           <div className="operator-card">
             <span className="avatar operator-avatar">{dashboard.profile.initials}</span>
             <div>
@@ -90,12 +131,30 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           <div className="operator-meta">
             <div><span>Timezone</span><strong>UK · GMT/BST</strong></div>
             <div><span>Currency</span><strong>{dashboard.profile.homeCurrency}</strong></div>
-            <div><span>Auth</span><strong>Supabase-ready</strong></div>
+            <div><span>Habits</span><strong>{completionPercent}% today</strong></div>
           </div>
         </Panel>
 
-        <Panel title="Session" description="Top key tasks for today." action={<span className="count-pill">{sessionTasks.length} active</span>}>
-          <div className="list">
+        <Panel kicker="02 // Session" title="Today" description="Capture one thing, then work the highest-scoring tasks." action={<span className="count-pill">{sessionTasks.length} active</span>} className="session-panel">
+          <form className="command-center" onSubmit={captureTask}>
+            <div>
+              <span className="panel-kicker">Focus prompt</span>
+              <h3 className="panel-title">What needs capturing before it gets lost?</h3>
+              <p>Use this as the inbox entry point for tasks, meeting notes, money context, and reminders.</p>
+              <div className="capture-row">
+                <input
+                  className="capture-input"
+                  value={captureText}
+                  onChange={(event) => setCaptureText(event.target.value)}
+                  placeholder="Add a priority, note, or reminder..."
+                  aria-label="Capture a priority for today"
+                />
+                <button className="btn" type="submit">Capture</button>
+              </div>
+            </div>
+            <div className="hero-clock">{currentTime}</div>
+          </form>
+          <div className="session-list">
             {sessionTasks.length ? (
               sessionTasks.map((task) => <SessionTask key={task.id} task={task} onDone={() => toggleTask(task.id)} />)
             ) : (
@@ -104,7 +163,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           </div>
         </Panel>
 
-        <Panel title="Calendar" description="Placeholder schedule until Apple Calendar is connected." action={<ButtonLink href="/calendar" variant="secondary">Open</ButtonLink>}>
+        <Panel kicker="03 // Calendar" title="Schedule" description="Today and the next visible commitments." action={<ButtonLink href="/calendar" variant="secondary">Open</ButtonLink>}>
           <div className="agenda-list">
             {dashboard.calendarEvents.slice(0, 4).map((event) => (
               <div className="agenda-row" key={event.id}>
@@ -118,7 +177,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           </div>
         </Panel>
 
-        <Panel title="Habits" description={`${completedToday}/${dashboard.habits.length} completed today.`}>
+        <Panel kicker="04 // Habits" title="Habits" description={`${completedToday}/${dashboard.habits.length} completed today.`} action={<span className="count-pill">{completionPercent}%</span>}>
           <div className="habit-grid">
             {dashboard.habits.map((habit) => (
               <div className="habit-row" key={habit.id}>
@@ -137,11 +196,11 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           </div>
         </Panel>
 
-        <Panel title="Finance Pulse" description={`Latest ${finance.source === "placeholder" ? "placeholder" : "sheet"} snapshot.`} action={<ButtonLink href="/finances" variant="secondary">Detail</ButtonLink>}>
+        <Panel kicker="05 // Finance" title="Finance Pulse" description={`Latest ${finance.source === "placeholder" ? "manual-ready" : "sheet"} snapshot.`} action={<ButtonLink href="/finances" variant="secondary">Detail</ButtonLink>}>
           <div className="metric-grid">
-            <div className="metric"><span>Net worth</span><strong>{formatCurrency(finance.netWorth, finance.currency)}</strong></div>
+            <div className="metric is-good"><span>Net worth</span><strong>{formatCurrency(finance.netWorth, finance.currency)}</strong></div>
             <div className="metric"><span>Assets</span><strong>{formatCurrency(assets, finance.currency)}</strong></div>
-            <div className="metric"><span>Liabilities</span><strong>{formatCurrency(liabilities, finance.currency)}</strong></div>
+            <div className="metric is-warn"><span>Liabilities</span><strong>{formatCurrency(liabilities, finance.currency)}</strong></div>
           </div>
           <div className="finance-categories">
             {finance.categories.map((category) => (

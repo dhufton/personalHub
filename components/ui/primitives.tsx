@@ -20,17 +20,24 @@ export function Panel({
   title,
   description,
   action,
-  children
+  children,
+  className,
+  kicker,
+  id
 }: {
   title: string;
   description?: string;
   action?: React.ReactNode;
   children: React.ReactNode;
+  className?: string;
+  kicker?: string;
+  id?: string;
 }) {
   return (
-    <article className="panel">
+    <article className={`panel${className ? ` ${className}` : ""}`} id={id}>
       <div className="panel-header">
         <div>
+          {kicker ? <span className="panel-kicker">{kicker}</span> : null}
           <h2 className="panel-title">{title}</h2>
           {description ? <p>{description}</p> : null}
         </div>

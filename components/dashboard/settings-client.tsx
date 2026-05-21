@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ConnectedAccount, UserProfile } from "@/lib/types";
-import { Panel, ScreenHeader } from "@/components/ui/primitives";
+import { ButtonLink, Panel, ScreenHeader } from "@/components/ui/primitives";
 
 export function SettingsClient({
   profile,
@@ -17,6 +17,7 @@ export function SettingsClient({
   const [appleCalendarUrl, setAppleCalendarUrl] = useState("");
   const [integrationStatus, setIntegrationStatus] = useState("");
   const [isSavingIntegration, setIsSavingIntegration] = useState(false);
+  const connectedCount = connections.filter((connection) => connection.enabled || connection.status === "connected").length;
 
   function toggleConnection(id: string) {
     setConnections((items) => items.map((item) => (item.id === id ? { ...item, enabled: !item.enabled } : item)));
@@ -24,6 +25,12 @@ export function SettingsClient({
 
   async function saveAppleCalendar(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const trimmedUrl = appleCalendarUrl.trim();
+    if (!trimmedUrl.startsWith("webcal://") && !trimmedUrl.startsWith("https://")) {
+      setIntegrationStatus("Use a public iCloud webcal:// or https:// calendar URL.");
+      return;
+    }
+
     setIsSavingIntegration(true);
     setIntegrationStatus("");
 
@@ -32,7 +39,7 @@ export function SettingsClient({
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         displayName: appleCalendarName,
-        icalUrl: appleCalendarUrl
+        icalUrl: trimmedUrl
       })
     });
     const payload = await response.json().catch(() => ({}));
@@ -58,7 +65,7 @@ export function SettingsClient({
         enabled: true,
         status: "connected" as const,
         accessMode: "public_ical" as const,
-        publicConfig: { ical_url: appleCalendarUrl }
+        publicConfig: { ical_url: trimmedUrl }
       };
 
       if (existingIndex >= 0) {
@@ -71,7 +78,7 @@ export function SettingsClient({
 
   return (
     <>
-      <ScreenHeader title="Settings" copy="Profile and connected accounts for the signed-in user." />
+      <ScreenHeader title="Settings" copy="Profile, calendar feeds, and account connections for this personal workspace." />
       <section className="settings-grid">
         <article className="settings-panel profile-card">
           <span className="avatar">{profile.initials}</span>
@@ -79,11 +86,14 @@ export function SettingsClient({
             <h2 className="panel-title">{profile.name}</h2>
             <p>{profile.email}</p>
           </div>
-          <button className="btn secondary" type="button">Change photo</button>
+          <div className="profile-stats">
+            <div><strong>{connectedCount}</strong><span>active</span></div>
+            <div><strong>{profile.homeCurrency}</strong><span>currency</span></div>
+          </div>
         </article>
 
         <div className="stack">
-          <Panel title="Profile" description="Basic details shown across the dashboard.">
+          <Panel kicker="01 // Identity" title="Profile" description="Basic details shown across the dashboard.">
             <form className="form-grid">
               <label>Display name<input className="field-input" defaultValue={profile.name} /></label>
               <label>Email<input className="field-input" defaultValue={profile.email} /></label>
@@ -92,7 +102,7 @@ export function SettingsClient({
             </form>
           </Panel>
 
-          <Panel title="Apple Calendars" description="Add one iCloud feed per calendar. Public iCloud links are stored per user; private CalDAV credentials should use Supabase Vault.">
+          <Panel id="apple-calendars" kicker="02 // Calendar" title="Apple Calendars" description="Add one iCloud feed per calendar. Public iCloud links are stored per user; private CalDAV credentials should use Supabase Vault.">
             <form className="integration-form" onSubmit={saveAppleCalendar}>
               <label>
                 Calendar name
@@ -112,7 +122,7 @@ export function SettingsClient({
                   onChange={(event) => setAppleCalendarUrl(event.target.value)}
                 />
               </label>
-              <button className="btn" type="submit" disabled={isSavingIntegration}>
+              <button className="btn" type="submit" disabled={isSavingIntegration || !appleCalendarUrl.trim()}>
                 {isSavingIntegration ? "Saving..." : "Add calendar"}
               </button>
               {integrationStatus ? <p className="auth-status">{integrationStatus}</p> : null}
@@ -132,14 +142,15 @@ export function SettingsClient({
             ) : null}
           </Panel>
 
-          <Panel title="Connected accounts" description="User-specific integrations feeding calendar and finance views." action={<button className="btn secondary" type="button">Connect</button>}>
+          <Panel kicker="03 // Integrations" title="Connected accounts" description="User-specific integrations feeding calendar and finance views." action={<ButtonLink href="#apple-calendars" variant="secondary">Add feed</ButtonLink>}>
             <div className="list">
               {connections.map((connection) => (
                 <div className="setting-row" key={connection.id}>
                   <div>
                     <strong>{connection.name}</strong>
-                    <span>{connection.description} · {connection.status}</span>
+                    <span>{connection.description}</span>
                   </div>
+                  <span className={`status-badge ${connection.status}`}>{connection.status.replace("_", " ")}</span>
                   <button
                     aria-label={`Toggle ${connection.name}`}
                     aria-pressed={connection.enabled}
