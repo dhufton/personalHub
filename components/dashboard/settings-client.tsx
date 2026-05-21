@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import type { ConnectedAccount, UserProfile } from "@/lib/types";
+import { useMemo, useState } from "react";
+import type { ConnectedAccount, HabitDefinition, UserProfile } from "@/lib/types";
 import { Panel, ScreenHeader } from "@/components/ui/primitives";
 
 const APPLE_CALENDAR_COLORS = [
@@ -18,14 +18,27 @@ const DEFAULT_CALENDAR_COLOR = APPLE_CALENDAR_COLORS[4].value;
 
 export function SettingsClient({
   profile,
-  connectedAccounts
+  connectedAccounts,
+  habits
 }: {
   profile: UserProfile;
   connectedAccounts: ConnectedAccount[];
+  habits: HabitDefinition[];
 }) {
   const [connections, setConnections] = useState(connectedAccounts);
+  const [habitItems, setHabitItems] = useState(habits);
+  const [habitName, setHabitName] = useState("");
+  const [habitTargetPerWeek, setHabitTargetPerWeek] = useState(7);
+  const [subHabitText, setSubHabitText] = useState("");
+  const [subHabitDrafts, setSubHabitDrafts] = useState<Record<string, string>>({});
+  const [habitStatus, setHabitStatus] = useState("");
+  const [isSavingHabit, setIsSavingHabit] = useState(false);
   const appleCalendars = connections.filter((connection) => connection.provider === "apple_calendar");
   const nonCalendarConnections = connections.filter((connection) => connection.provider !== "apple_calendar");
+  const topLevelHabits = useMemo(
+    () => habitItems.filter((habit) => !habit.parentHabitId).sort(compareHabits),
+    [habitItems]
+  );
   const [appleCalendarName, setAppleCalendarName] = useState("");
   const [appleCalendarUrl, setAppleCalendarUrl] = useState("");
   const [appleCalendarColor, setAppleCalendarColor] = useState<string>(DEFAULT_CALENDAR_COLOR);
@@ -35,6 +48,90 @@ export function SettingsClient({
 
   function toggleConnection(id: string) {
     setConnections((items) => items.map((item) => (item.id === id ? { ...item, enabled: !item.enabled } : item)));
+  }
+
+  function subHabitsFor(parentId: string) {
+    return habitItems.filter((habit) => habit.parentHabitId === parentId).sort(compareHabits);
+  }
+
+  async function saveHabit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = habitName.trim();
+    if (!name) return;
+
+    setIsSavingHabit(true);
+    setHabitStatus("");
+
+    const response = await fetch("/api/habits", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name,
+        targetPerWeek: habitTargetPerWeek,
+        subHabits: splitSubHabitText(subHabitText)
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+    setIsSavingHabit(false);
+
+    if (!response.ok) {
+      setHabitStatus(typeof payload.error === "string" ? payload.error : "Could not save habit.");
+      return;
+    }
+
+    const nextHabits = [payload.habit, ...(Array.isArray(payload.subHabits) ? payload.subHabits : [])].filter(Boolean);
+    setHabitItems((items) => [...items, ...nextHabits]);
+    setHabitName("");
+    setSubHabitText("");
+    setHabitTargetPerWeek(7);
+    setHabitStatus(`${name} added.`);
+  }
+
+  async function addSubHabit(parentId: string) {
+    const name = subHabitDrafts[parentId]?.trim() ?? "";
+    if (!name) return;
+
+    const parent = habitItems.find((habit) => habit.id === parentId);
+    setHabitStatus("");
+
+    const response = await fetch("/api/habits", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name,
+        parentHabitId: parentId,
+        targetPerWeek: parent?.targetPerWeek ?? 7
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setHabitStatus(typeof payload.error === "string" ? payload.error : "Could not save sub-habit.");
+      return;
+    }
+
+    setHabitItems((items) => [...items, payload.habit].filter(Boolean));
+    setSubHabitDrafts((drafts) => ({ ...drafts, [parentId]: "" }));
+    setHabitStatus(`${name} added.`);
+  }
+
+  async function deleteHabit(id: string) {
+    const habit = habitItems.find((item) => item.id === id);
+    setHabitItems((items) => items.filter((item) => item.id !== id && item.parentHabitId !== id));
+
+    const response = await fetch("/api/habits", {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id })
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      setHabitStatus(typeof payload.error === "string" ? payload.error : "Could not delete habit.");
+      return;
+    }
+
+    setHabitStatus(`${habit?.name ?? "Habit"} removed.`);
   }
 
   async function updateAppleCalendar(
@@ -181,6 +278,100 @@ export function SettingsClient({
             </form>
           </Panel>
 
+          <Panel id="habits" title="Habits" description="Create top-level habits and optional sub-habits. When every sub-habit is checked off for a day, the overall habit is completed automatically.">
+            <form className="habit-manager-form" onSubmit={saveHabit}>
+              <label>
+                Habit name
+                <input
+                  className="field-input"
+                  placeholder="Exercise"
+                  value={habitName}
+                  onChange={(event) => setHabitName(event.target.value)}
+                />
+              </label>
+              <label>
+                Target days
+                <select
+                  className="select-input"
+                  value={habitTargetPerWeek}
+                  onChange={(event) => setHabitTargetPerWeek(Number(event.target.value))}
+                >
+                  {[1, 2, 3, 4, 5, 6, 7].map((value) => (
+                    <option key={value} value={value}>{value}/week</option>
+                  ))}
+                </select>
+              </label>
+              <label className="habit-subhabit-field">
+                Sub-habits
+                <textarea
+                  className="field-input textarea-input"
+                  placeholder="Walk 10 mins, go to gym, lift weights"
+                  value={subHabitText}
+                  onChange={(event) => setSubHabitText(event.target.value)}
+                />
+              </label>
+              <button className="btn habit-add-button" type="submit" disabled={isSavingHabit || !habitName.trim()}>
+                {isSavingHabit ? "Saving..." : "Add habit"}
+              </button>
+              {habitStatus ? <p className="auth-status">{habitStatus}</p> : null}
+            </form>
+            {topLevelHabits.length ? (
+              <div className="habit-manager-list">
+                {topLevelHabits.map((habit) => {
+                  const subHabits = subHabitsFor(habit.id);
+                  return (
+                    <div className="habit-manager-row" key={habit.id}>
+                      <div className="habit-manager-main">
+                        <div>
+                          <strong>{habit.name}</strong>
+                          <span>{subHabits.length ? `${subHabits.length} sub-habit${subHabits.length === 1 ? "" : "s"}` : `${habit.targetPerWeek}/week target`}</span>
+                        </div>
+                        <button
+                          aria-label={`Remove ${habit.name}`}
+                          className="calendar-delete-button"
+                          type="button"
+                          onClick={() => deleteHabit(habit.id)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                      {subHabits.length ? (
+                        <div className="subhabit-list">
+                          {subHabits.map((subHabit) => (
+                            <div className="subhabit-manager-row" key={subHabit.id}>
+                              <span>{subHabit.name}</span>
+                              <button
+                                aria-label={`Remove ${subHabit.name}`}
+                                className="calendar-delete-button compact"
+                                type="button"
+                                onClick={() => deleteHabit(subHabit.id)}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                      <div className="subhabit-add-row">
+                        <input
+                          className="field-input"
+                          placeholder={`Add a sub-habit to ${habit.name}`}
+                          value={subHabitDrafts[habit.id] ?? ""}
+                          onChange={(event) => setSubHabitDrafts((drafts) => ({ ...drafts, [habit.id]: event.target.value }))}
+                        />
+                        <button className="btn secondary" type="button" onClick={() => addSubHabit(habit.id)}>
+                          Add sub-habit
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="empty-state calendar-empty">No habits yet. Add your first habit above.</p>
+            )}
+          </Panel>
+
           <Panel id="apple-calendars" title="Apple Calendars" description="Manage the calendars shown in this workspace. Add a feed, rename it, pick a colour, disable it, or remove it from one card.">
             <form className="calendar-add-form" onSubmit={saveAppleCalendar}>
               <label>
@@ -324,4 +515,15 @@ function getCalendarMeta(calendar: ConnectedAccount) {
   const feedUrl = calendar.publicConfig?.ical_url;
   const feedLabel = typeof feedUrl === "string" ? "iCloud feed" : "Calendar feed";
   return calendar.enabled ? `Syncing ${feedLabel}` : `${feedLabel} disabled`;
+}
+
+function splitSubHabitText(value: string) {
+  return value
+    .split(/[\n,]/)
+    .map((item) => item.trim().replace(/\s+/g, " "))
+    .filter(Boolean);
+}
+
+function compareHabits(a: HabitDefinition, b: HabitDefinition) {
+  return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
 }

@@ -8,7 +8,7 @@ export default async function SettingsPage() {
 
   return (
     <AppShell active="settings" profile={data.profile} cta={<ButtonLink href="/dashboard" variant="secondary">Done</ButtonLink>}>
-      <SettingsClient profile={data.profile} connectedAccounts={data.connectedAccounts} />
+      <SettingsClient profile={data.profile} connectedAccounts={data.connectedAccounts} habits={data.habits} />
     </AppShell>
   );
 }

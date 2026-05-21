@@ -40,6 +40,7 @@ export type CalendarEvent = {
 export type HabitDefinition = {
   id: string;
   name: string;
+  parentHabitId?: string;
   targetPerWeek: number;
   sortOrder: number;
   active: boolean;

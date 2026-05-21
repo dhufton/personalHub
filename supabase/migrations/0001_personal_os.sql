@@ -144,6 +144,7 @@ update public.calendar_events set source = 'apple' where source = 'google';
 create table if not exists public.habit_definitions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
+  parent_habit_id uuid references public.habit_definitions (id) on delete cascade,
   name text not null,
   target_per_week integer not null default 7,
   sort_order integer not null default 0,
@@ -153,6 +154,7 @@ create table if not exists public.habit_definitions (
 );
 
 alter table public.habit_definitions add column if not exists user_id uuid references public.profiles (id) on delete cascade;
+alter table public.habit_definitions add column if not exists parent_habit_id uuid references public.habit_definitions (id) on delete cascade;
 alter table public.habit_definitions add column if not exists name text;
 alter table public.habit_definitions add column if not exists target_per_week integer not null default 7;
 alter table public.habit_definitions add column if not exists sort_order integer not null default 0;
@@ -388,6 +390,9 @@ create index if not exists calendar_events_user_date_idx
 
 create index if not exists habit_entries_user_date_idx
   on public.habit_entries (user_id, log_date desc);
+
+create index if not exists habit_definitions_user_parent_sort_idx
+  on public.habit_definitions (user_id, parent_habit_id, sort_order);
 
 create index if not exists finance_snapshots_user_as_of_idx
   on public.finance_snapshots (user_id, as_of desc);

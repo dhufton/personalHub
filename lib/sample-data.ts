@@ -90,7 +90,10 @@ export const sampleDashboardData: DashboardData = {
     }
   ],
   habits: [
-    { id: "habit_train", name: "Train", targetPerWeek: 4, sortOrder: 1, active: true },
+    { id: "habit_train", name: "Exercise", targetPerWeek: 4, sortOrder: 1, active: true },
+    { id: "habit_walk_10", name: "Walk 10 mins", parentHabitId: "habit_train", targetPerWeek: 4, sortOrder: 1, active: true },
+    { id: "habit_gym", name: "Go to gym", parentHabitId: "habit_train", targetPerWeek: 4, sortOrder: 2, active: true },
+    { id: "habit_lift", name: "Lift weights", parentHabitId: "habit_train", targetPerWeek: 4, sortOrder: 3, active: true },
     { id: "habit_read", name: "Read", targetPerWeek: 5, sortOrder: 2, active: true },
     { id: "habit_water", name: "Water", targetPerWeek: 7, sortOrder: 3, active: true },
     { id: "habit_walk", name: "Walk", targetPerWeek: 5, sortOrder: 4, active: true },
@@ -100,6 +103,10 @@ export const sampleDashboardData: DashboardData = {
   habitLogs: [
     { habitId: "habit_train", date: "2026-05-18", completed: true },
     { habitId: "habit_train", date: "2026-05-19", completed: true },
+    { habitId: "habit_walk_10", date: "2026-05-18", completed: true },
+    { habitId: "habit_gym", date: "2026-05-18", completed: true },
+    { habitId: "habit_lift", date: "2026-05-18", completed: true },
+    { habitId: "habit_walk_10", date: "2026-05-19", completed: true },
     { habitId: "habit_read", date: "2026-05-18", completed: true },
     { habitId: "habit_read", date: "2026-05-20", completed: true },
     { habitId: "habit_water", date: "2026-05-18", completed: true },

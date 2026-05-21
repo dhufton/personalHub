@@ -7,10 +7,10 @@ export function ButtonLink({
 }: {
   href: string;
   children: React.ReactNode;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "success";
 }) {
   return (
-    <Link className={`btn${variant === "secondary" ? " secondary" : ""}`} href={href}>
+    <Link className={`btn${variant === "secondary" ? " secondary" : ""}${variant === "success" ? " success" : ""}`} href={href}>
       {children}
     </Link>
   );

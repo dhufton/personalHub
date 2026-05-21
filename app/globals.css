@@ -478,6 +478,16 @@ main {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset, 0 8px 18px rgba(29, 29, 31, 0.06);
 }
 
+.btn.success {
+  background: var(--mint);
+  box-shadow: 0 10px 24px rgba(52, 199, 89, 0.22);
+}
+
+.btn.success:hover {
+  background: #30b852;
+  box-shadow: 0 12px 28px rgba(52, 199, 89, 0.26);
+}
+
 .btn.ghost {
   color: var(--muted);
   box-shadow: none;
@@ -797,6 +807,11 @@ main {
   box-shadow: var(--focus-ring);
 }
 
+.textarea-input {
+  min-height: 84px;
+  resize: vertical;
+}
+
 .session-list {
   display: grid;
   gap: var(--space-2);
@@ -1051,6 +1066,108 @@ main {
 .dot.is-on {
   border-color: rgba(52, 199, 89, 0.45);
   background: radial-gradient(circle at center, var(--mint) 38%, transparent 41%), var(--mint-soft);
+}
+
+.habit-today-list,
+.habit-manager-list,
+.subhabit-list,
+.subhabit-check-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.habit-today-row,
+.habit-manager-row {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.habit-checkbox-row,
+.subhabit-check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.habit-checkbox-row {
+  justify-content: space-between;
+}
+
+.habit-checkbox-row > span {
+  min-width: 0;
+  flex: 1;
+}
+
+.habit-checkbox-row strong,
+.habit-manager-main strong {
+  display: block;
+  color: var(--fg);
+  font-size: var(--text-base);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.habit-checkbox-row small,
+.habit-manager-main span,
+.subhabit-manager-row span,
+.subhabit-details summary {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.habit-checkbox-row input,
+.subhabit-check-row input {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  accent-color: var(--mint);
+}
+
+.subhabit-details {
+  margin-top: var(--space-3);
+}
+
+.subhabit-details summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.subhabit-check-list {
+  margin-top: var(--space-2);
+  padding-left: var(--space-4);
+}
+
+.subhabit-check-row {
+  min-height: 34px;
+}
+
+.habit-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.week-dot-group {
+  display: grid;
+  place-items: center;
+  min-height: 54px;
+  border-radius: var(--radius-md);
+  background: rgba(118, 118, 128, 0.09);
+}
+
+.week-dot-group span {
+  color: var(--meta);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.week-dot-group strong {
+  color: var(--fg);
+  font-size: var(--text-sm);
 }
 
 .finance-chart {
@@ -1374,11 +1491,24 @@ main {
   align-items: end;
 }
 
+.habit-manager-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 140px auto;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.habit-subhabit-field,
+.habit-manager-form .auth-status {
+  grid-column: 1 / -1;
+}
+
 .calendar-add-form .auth-status {
   grid-column: 1 / -1;
 }
 
 .calendar-add-form label,
+.habit-manager-form label,
 .calendar-edit-fields label,
 .calendar-color-picker {
   display: grid;
@@ -1437,6 +1567,43 @@ main {
   display: grid;
   gap: var(--space-2);
   margin-top: var(--space-5);
+}
+
+.habit-manager-list {
+  margin-top: var(--space-5);
+}
+
+.habit-manager-row {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.habit-manager-main,
+.subhabit-manager-row,
+.subhabit-add-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.subhabit-manager-row {
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  padding: 7px 9px 7px 13px;
+  background: rgba(118, 118, 128, 0.08);
+}
+
+.subhabit-manager-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subhabit-add-row {
+  align-items: stretch;
 }
 
 .calendar-manager-row {
@@ -1521,6 +1688,12 @@ main {
   font-size: 22px;
   font-weight: 600;
   line-height: 1;
+}
+
+.calendar-delete-button.compact {
+  width: 28px;
+  height: 28px;
+  font-size: 18px;
 }
 
 .calendar-delete-button:hover {
@@ -1663,6 +1836,7 @@ main {
   .capture-row,
   .session-panel .capture-form,
   .calendar-add-form,
+  .habit-manager-form,
   .metric-grid,
   .account-grid,
   .stat-strip,
@@ -1694,6 +1868,14 @@ main {
 
   .habit-row {
     grid-template-columns: minmax(86px, 1fr) repeat(7, 22px);
+  }
+
+  .habit-week-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .subhabit-add-row {
+    display: grid;
   }
 
   .dot {

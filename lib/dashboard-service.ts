@@ -57,6 +57,7 @@ type CalendarEventRow = {
 type HabitRow = {
   id: string;
   name: string;
+  parent_habit_id: string | null;
   target_per_week: number | null;
   sort_order: number | null;
   active: boolean | null;
@@ -119,9 +120,10 @@ export async function getDashboardData(): Promise<DashboardData> {
         .returns<CalendarEventRow[]>(),
       supabase
         .from("habit_definitions")
-        .select("id,name,target_per_week,sort_order,active")
+        .select("id,name,parent_habit_id,target_per_week,sort_order,active")
         .eq("user_id", userId)
         .eq("active", true)
+        .order("parent_habit_id", { ascending: true, nullsFirst: true })
         .order("sort_order", { ascending: true })
         .returns<HabitRow[]>(),
       supabase
@@ -240,6 +242,7 @@ function mapHabit(row: HabitRow): HabitDefinition {
   return {
     id: row.id,
     name: row.name,
+    parentHabitId: row.parent_habit_id ?? undefined,
     targetPerWeek: row.target_per_week ?? 7,
     sortOrder: row.sort_order ?? 0,
     active: row.active ?? true
