@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { UserProfile } from "@/lib/types";
 
-type ActiveRoute = "overview" | "dashboard" | "calendar" | "finances" | "settings";
+type ActiveRoute = "dashboard" | "calendar" | "finances" | "settings";
 
 const navItems: Array<{ href: string; label: string; key: ActiveRoute }> = [
   { href: "/dashboard", label: "Home", key: "dashboard" },

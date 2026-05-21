@@ -39,9 +39,6 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-12: 48px;
-  --section-y-desktop: 100px;
-  --section-y-tablet: 64px;
-  --section-y-phone: 40px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
@@ -98,11 +95,6 @@ button {
 :focus-visible {
   outline: 0;
   box-shadow: var(--focus-ring);
-}
-
-.container {
-  width: min(var(--container-max), calc(100% - (var(--container-gutter-desktop) * 2)));
-  margin: 0 auto;
 }
 
 .wide-container {
@@ -205,28 +197,8 @@ button {
   background: var(--surface);
 }
 
-.hero {
-  position: relative;
-  overflow: hidden;
-  color: var(--accent-on);
-  background: var(--fg);
-}
-
-.hero .container,
-.hero .wide-container {
-  min-height: clamp(620px, 86vh, 860px);
-  display: grid;
-  grid-template-columns: minmax(0, 0.88fr) minmax(360px, 1.12fr);
-  align-items: center;
-  gap: clamp(30px, 5vw, 72px);
-  padding: clamp(56px, 9vh, 100px) 0;
-}
-
-.hero-title,
-.section-title,
 .screen-title,
-.panel-title,
-.card-title {
+.panel-title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
@@ -235,25 +207,14 @@ button {
   text-wrap: balance;
 }
 
-.hero-title {
-  font-size: clamp(48px, 6.6vw, var(--text-4xl));
-}
-
 .screen-title {
   font-size: clamp(36px, 5vw, var(--text-3xl));
 }
 
-.section-title {
-  font-size: clamp(34px, 4vw, var(--text-3xl));
-}
-
-.panel-title,
-.card-title {
+.panel-title {
   font-size: var(--text-xl);
 }
 
-.hero-copy,
-.section-lead,
 .screen-copy {
   margin: var(--space-5) 0 0;
   max-width: 660px;
@@ -268,7 +229,6 @@ button {
   font-size: var(--text-lg);
 }
 
-.hero-actions,
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -276,65 +236,11 @@ button {
   gap: var(--space-3);
 }
 
-.hero-actions {
-  margin-top: var(--space-8);
-}
-
-.glass-panel,
 .panel,
 .settings-panel {
   border-radius: var(--radius-lg);
   background: var(--bg);
   box-shadow: var(--elev-flat);
-}
-
-.glass-panel {
-  padding: clamp(18px, 2.4vw, 28px);
-  color: var(--fg);
-  box-shadow: 0 30px 70px color-mix(in oklab, black, transparent 70%);
-}
-
-.section {
-  padding: var(--section-y-desktop) 0;
-}
-
-.section.surface {
-  background: var(--surface);
-}
-
-.feature-grid,
-.launcher-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-4);
-  margin-top: var(--space-8);
-}
-
-.feature-card,
-.launcher-card {
-  min-height: 220px;
-  padding: var(--space-6);
-  border-radius: 30px;
-  background: var(--bg);
-}
-
-.launcher-card {
-  background: var(--surface);
-  transition: transform var(--motion-base) var(--ease-standard), box-shadow var(--motion-base) var(--ease-standard);
-}
-
-.launcher-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--elev-raised);
-}
-
-.eyebrow {
-  color: var(--accent-active);
-  font-size: var(--text-sm);
-}
-
-.muted {
-  color: var(--muted);
 }
 
 .app-layout {
@@ -476,15 +382,12 @@ button {
 }
 
 .panel-header p,
-.feature-card p,
-.launcher-card p,
 .settings-panel p {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: var(--text-sm);
 }
 
-.mini-dashboard,
 .list,
 .habit-grid {
   display: grid;
@@ -983,11 +886,6 @@ button {
 }
 
 @media (max-width: 1180px) {
-  .feature-grid,
-  .launcher-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .os-grid,
   .dashboard-grid,
   .finance-layout,
@@ -1006,16 +904,8 @@ button {
 }
 
 @media (max-width: 920px) {
-  .container,
   .wide-container {
     width: min(100% - (var(--container-gutter-tablet) * 2), var(--container-max));
-  }
-
-  .hero .container,
-  .hero .wide-container {
-    grid-template-columns: 1fr;
-    min-height: auto;
-    padding: var(--section-y-tablet) 0;
   }
 
   .app-layout {
@@ -1049,7 +939,6 @@ button {
 }
 
 @media (max-width: 640px) {
-  .container,
   .wide-container {
     width: min(100% - (var(--container-gutter-phone) * 2), var(--container-max));
   }
@@ -1066,12 +955,6 @@ button {
     padding-bottom: 2px;
   }
 
-  .section {
-    padding: var(--section-y-phone) 0;
-  }
-
-  .feature-grid,
-  .launcher-grid,
   .metric-grid,
   .account-grid,
   .form-grid {
