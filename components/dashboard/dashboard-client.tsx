@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
 import { fetchJson } from "@/lib/fetcher";
 import { formatCurrency } from "@/lib/format";
-import type { DashboardData, HabitDefinition, HabitLog, Task } from "@/lib/types";
+import type { DashboardData, HabitDefinition, HabitLog } from "@/lib/types";
 import { ButtonLink, Panel, ScreenHeader } from "@/components/ui/primitives";
 
 export function DashboardClient({ initialData }: { initialData: DashboardData }) {
@@ -14,21 +14,25 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
   });
   const dashboard = data ?? initialData;
   const [habitLogs, setHabitLogs] = useState<HabitLog[]>(dashboard.habitLogs);
-  const [capturedTasks, setCapturedTasks] = useState<Task[]>([]);
-  const [captureText, setCaptureText] = useState("");
-  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+  const [localReminders, setLocalReminders] = useState<ReminderPreview[]>([]);
+  const [reminderText, setReminderText] = useState("");
   const [toast, setToast] = useState("");
-  const [currentTime, setCurrentTime] = useState("--:--");
 
-  const sessionTasks = useMemo(() => {
-    return [...capturedTasks, ...dashboard.tasks]
-      .filter((task) => task.urgency === "today" && task.key && !completedTasks.has(task.id))
-      .sort((a, b) => b.priorityScore - a.priorityScore)
+  const reminders = useMemo(() => {
+    return [
+      ...localReminders,
+      ...dashboard.tasks.filter((task) => !task.completedAt).map((task) => ({
+        id: task.id,
+        title: task.title,
+        dueDate: task.dueDate
+      }))
+    ]
       .slice(0, 4);
-  }, [capturedTasks, completedTasks, dashboard.tasks]);
+  }, [dashboard.tasks, localReminders]);
 
   const weekDates = useMemo(() => getWeekDates(), []);
   const todayKey = localDateKey(new Date());
+  const calendarPreview = dashboard.calendarEvents.filter((event) => event.date >= todayKey).slice(0, 3);
   const topLevelHabits = useMemo(() => dashboard.habits.filter((habit) => !habit.parentHabitId).sort(compareHabits), [dashboard.habits]);
   const habitMap = useMemo(() => {
     const map = new Map<string, boolean>();
@@ -48,53 +52,26 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
     timeZone: dashboard.profile.timezone
   }).format(new Date());
 
-  useEffect(() => {
-    function syncClock() {
-      setCurrentTime(new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: dashboard.profile.timezone }).format(new Date()));
-    }
-
-    syncClock();
-    const interval = window.setInterval(syncClock, 60_000);
-    return () => window.clearInterval(interval);
-  }, [dashboard.profile.timezone]);
-
   function flash(message: string) {
     setToast(message);
     window.setTimeout(() => setToast(""), 1800);
   }
 
-  function captureTask(event: React.FormEvent<HTMLFormElement>) {
+  function addReminder(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const title = captureText.trim();
+    const title = reminderText.trim();
     if (!title) return;
 
-    setCapturedTasks((items) => [
+    setLocalReminders((items) => [
       {
-        id: `capture_${Date.now()}`,
+        id: `reminder_${Date.now()}`,
         title,
-        urgency: "today",
-        key: true,
-        priorityScore: 82,
-        timeEstimateMin: 20,
-        tags: ["capture"]
+        isLocal: true
       },
       ...items
     ]);
-    setCaptureText("");
-    flash("Added to today's session");
-  }
-
-  function toggleTask(taskId: string) {
-    setCompletedTasks((items) => {
-      const next = new Set(items);
-      if (next.has(taskId)) {
-        next.delete(taskId);
-      } else {
-        next.add(taskId);
-      }
-      return next;
-    });
-    flash("Session updated locally");
+    setReminderText("");
+    flash("Reminder added locally");
   }
 
   function subHabitsFor(parentId: string) {
@@ -143,7 +120,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
     <>
       <ScreenHeader
         title={`Good afternoon, ${dashboard.profile.name}.`}
-        copy="A calm command center for today: priorities, calendar, habits, and money in one readable workspace."
+        copy="A calm command center for today: reminders, calendar, habits, and money in one readable workspace."
         actions={
           <>
             <ButtonLink href="/login" variant="secondary">Auth</ButtonLink>
@@ -168,30 +145,50 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
           </div>
         </Panel>
 
-        <Panel title="Today" description="Capture one thing, then work the highest-scoring tasks." action={<span className="count-pill">{sessionTasks.length} active</span>} className="session-panel">
-          <form className="command-center" onSubmit={captureTask}>
+        <Panel
+          title="Today"
+          description="Reminders and calendar events at a glance."
+          action={<span className="count-pill">{reminders.length} reminder{reminders.length === 1 ? "" : "s"}</span>}
+          className="session-panel"
+        >
+          <form className="command-center" onSubmit={addReminder}>
             <div>
-              <span className="panel-kicker">Focus prompt</span>
-              <h3 className="panel-title">What needs capturing before it gets lost?</h3>
-              <p>Use this as the inbox entry point for tasks, meeting notes, money context, and reminders.</p>
+              <span className="panel-kicker">Reminders</span>
+              <h3 className="panel-title">What should you remember?</h3>
+              <p>New reminders remain local to this dashboard until a supported sync provider is connected.</p>
               <div className="capture-row">
                 <input
                   className="capture-input"
-                  value={captureText}
-                  onChange={(event) => setCaptureText(event.target.value)}
-                  placeholder="Add a priority, note, or reminder..."
-                  aria-label="Capture a priority for today"
+                  value={reminderText}
+                  onChange={(event) => setReminderText(event.target.value)}
+                  placeholder="Add a reminder..."
+                  aria-label="Add a new reminder"
                 />
-                <button className="btn" type="submit">Capture</button>
+                <button className="btn" type="submit">Add reminder</button>
               </div>
             </div>
-            <div className="hero-clock">{currentTime}</div>
           </form>
-          <div className="session-list">
-            {sessionTasks.length ? (
-              sessionTasks.map((task) => <SessionTask key={task.id} task={task} onDone={() => toggleTask(task.id)} />)
+          <div className="session-list" aria-label="Reminder preview">
+            {reminders.length ? (
+              reminders.map((reminder) => <ReminderRow key={reminder.id} reminder={reminder} />)
             ) : (
-              <p className="empty-state">No key tasks left for today.</p>
+              <p className="empty-state">No reminders to show.</p>
+            )}
+          </div>
+          <div className="agenda-list" aria-label="Calendar preview">
+            <span className="panel-kicker">Upcoming calendar</span>
+            {calendarPreview.length ? (
+              calendarPreview.map((event) => (
+                <div className="agenda-row" key={event.id}>
+                  <time>{formatShortDate(event.date)}</time>
+                  <div>
+                    <strong>{event.title}</strong>
+                    <span>{formatCalendarEventMeta(event)}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="empty-state">No upcoming calendar events.</p>
             )}
           </div>
         </Panel>
@@ -296,15 +293,21 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
   );
 }
 
-function SessionTask({ task, onDone }: { task: Task; onDone: () => void }) {
+type ReminderPreview = {
+  id: string;
+  title: string;
+  dueDate?: string;
+  isLocal?: boolean;
+};
+
+function ReminderRow({ reminder }: { reminder: ReminderPreview }) {
   return (
     <div className="list-row">
-      <button className="check" type="button" aria-label={`Complete ${task.title}`} onClick={onDone} />
+      <span className="status-dot" aria-hidden="true" />
       <div>
-        <strong>{task.title}</strong>
-        <span>{task.timeEstimateMin ? `${task.timeEstimateMin} min` : "Unestimated"} · score {task.priorityScore}</span>
+        <strong>{reminder.title}</strong>
+        <span>{formatReminderMeta(reminder)}</span>
       </div>
-      <span>{task.tags[0] ?? "task"}</span>
     </div>
   );
 }
@@ -351,6 +354,12 @@ function formatCalendarEventMeta(event: DashboardData["calendarEvents"][number])
   }
 
   return `${event.startTime} - ${event.endTime}${event.location ? ` · ${event.location}` : ""}`;
+}
+
+function formatReminderMeta(reminder: ReminderPreview) {
+  if (reminder.isLocal) return "Added locally";
+  if (reminder.dueDate) return `Due ${formatShortDate(reminder.dueDate)}`;
+  return "Reminder";
 }
 
 function compareHabits(a: HabitDefinition, b: HabitDefinition) {

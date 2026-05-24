@@ -20,16 +20,17 @@ afterEach(() => {
 });
 
 describe("DashboardClient", () => {
-  it("captures and completes local tasks and writes habit toggles", () => {
+  it("adds local reminders, previews calendar events and writes habit toggles", () => {
     const data = dashboardFixture();
     data.tasks = [
       {
         id: "today",
-        title: "Priority task",
+        title: "Pay electricity bill",
         urgency: "today",
         key: true,
         priorityScore: 90,
-        tags: []
+        tags: [],
+        dueDate: "2026-05-24"
       }
     ];
     data.calendarEvents = [
@@ -55,13 +56,13 @@ describe("DashboardClient", () => {
 
     const { container } = render(<DashboardClient initialData={data} />);
 
-    expect(screen.getByText("Priority task")).toBeInTheDocument();
-    expect(screen.getByText("All Day · Office")).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Capture a priority for today"), { target: { value: "New note" } });
-    fireEvent.click(screen.getByRole("button", { name: "Capture" }));
-    expect(screen.getByText("New note")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Complete Priority task" }));
-    expect(screen.queryByText("Priority task")).not.toBeInTheDocument();
+    expect(screen.getByText("Pay electricity bill")).toBeInTheDocument();
+    expect(screen.getByText("Due Sun 24 May")).toBeInTheDocument();
+    expect(screen.getAllByText("All Day · Office").length).toBeGreaterThan(0);
+    fireEvent.change(screen.getByLabelText("Add a new reminder"), { target: { value: "Buy milk" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add reminder" }));
+    expect(screen.getByText("Buy milk")).toBeInTheDocument();
+    expect(screen.getByText("Added locally")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Today" }));
 
     const readRow = screen.getByText("Read").closest("label");
@@ -79,16 +80,18 @@ describe("DashboardClient", () => {
     expect(screen.getByText(/2\/2 sub-habits/)).toBeInTheDocument();
   });
 
-  it("renders empty task and habit states", () => {
+  it("renders empty reminder, calendar and habit states", () => {
     const data = dashboardFixture();
     data.tasks = [];
+    data.calendarEvents = [];
     data.habits = [];
     data.habitLogs = [];
     vi.mocked(useSWR).mockReturnValue({ data: undefined } as never);
 
     render(<DashboardClient initialData={data} />);
 
-    expect(screen.getByText("No key tasks left for today.")).toBeInTheDocument();
+    expect(screen.getByText("No reminders to show.")).toBeInTheDocument();
+    expect(screen.getByText("No upcoming calendar events.")).toBeInTheDocument();
     expect(screen.getByText("No habits yet. Add one from Settings.")).toBeInTheDocument();
   });
 });
