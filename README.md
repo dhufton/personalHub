@@ -75,3 +75,25 @@ The Render Blueprint uses:
 - Node version: `24.14.1`
 
 For a manual Render web service setup, choose the Node runtime and use the same build and start commands above.
+
+## Unit tests
+
+The application uses Vitest and Testing Library for unit tests in `test/`, organized to mirror the source
+directories. The suite covers services, API handlers, auth and Supabase boundaries, reusable helpers, and
+interactive dashboard components.
+
+Run the unit suite:
+
+```bash
+npm test
+```
+
+Generate a local unit-test coverage report in `coverage/unit`:
+
+```bash
+npm run test:coverage
+```
+
+Use `npm run test:watch` while developing. The unit coverage baseline is enforced by Vitest so new changes do
+not silently reduce current coverage. Browser workflow coverage should be selected as part of the integration
+testing approach.
